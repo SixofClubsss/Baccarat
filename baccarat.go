@@ -29,6 +29,17 @@ type baccObjects struct {
 
 var Table baccObjects
 
+func DreamsMenuIntro() (entries map[string][]string) {
+	entries = map[string][]string{
+		"Baccarat": {
+			"A popular table game, where closest to 9 wins",
+			"Bet on player, banker or tie as the winning outcome",
+			"Select table with bottom left drop down to choose currency"},
+	}
+
+	return
+}
+
 func initValues() {
 	Bacc.Display = true
 }
