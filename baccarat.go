@@ -35,13 +35,6 @@ func DreamsMenuIntro() (entries map[string][]string) {
 	return
 }
 
-func SetLabels() {
-	B.LeftLabel = widget.NewLabel("")
-	B.RightLabel = widget.NewLabel("")
-	B.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " dReams, Max Bet is " + Display.BaccMax)
-	B.RightLabel.SetText("dReams Balance: " + rpc.DisplayBalance("dReams") + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
-}
-
 // Function for when Baccarat tab is selected
 func OnTabSelected(d dreams.DreamsObject) {
 	GetBaccTables()
