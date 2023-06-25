@@ -22,12 +22,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type baccObjects struct {
-	Actions *fyne.Container
-	Map     map[string]string
-}
-
-var Table baccObjects
+var Tables map[string]string
 
 func DreamsMenuIntro() (entries map[string][]string) {
 	entries = map[string][]string{
@@ -40,35 +35,38 @@ func DreamsMenuIntro() (entries map[string][]string) {
 	return
 }
 
-func initValues() {
-	Bacc.Display = true
+func SetLabels() {
+	B.LeftLabel = widget.NewLabel("")
+	B.RightLabel = widget.NewLabel("")
+	B.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " dReams, Max Bet is " + Display.BaccMax)
+	B.RightLabel.SetText("dReams Balance: " + rpc.DisplayBalance("dReams") + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
 }
 
 // Function for when Baccarat tab is selected
-func OnTabSelected(b *dreams.DreamsItems, d dreams.DreamsObject) {
+func OnTabSelected(d dreams.DreamsObject) {
 	GetBaccTables()
-	BaccRefresh(b, d)
+	BaccRefresh(d)
 	if rpc.Wallet.IsConnected() && Bacc.Display {
 		ActionBuffer(false)
 	}
 }
 
 // Main Baccarat process
-func fetch(b *dreams.DreamsItems, d dreams.DreamsObject) {
-	initValues()
+func fetch(d dreams.DreamsObject) {
+	Bacc.Display = true
 	time.Sleep(3 * time.Second)
 	for {
 		select {
 		case <-d.Receive():
 			if !rpc.Wallet.IsConnected() || !rpc.Daemon.IsConnected() {
 				disableBaccActions(true)
-				BaccRefresh(b, d)
+				BaccRefresh(d)
 				d.WorkDone()
 				continue
 			}
 
 			fetchBaccSC()
-			BaccRefresh(b, d)
+			BaccRefresh(d)
 			d.WorkDone()
 		case <-d.CloseDapp():
 			log.Println("[Baccarat] Done")
@@ -80,7 +78,7 @@ func fetch(b *dreams.DreamsItems, d dreams.DreamsObject) {
 // Baccarat object buffer when action triggered
 func ActionBuffer(d bool) {
 	if d {
-		Table.Actions.Hide()
+		B.Actions.Hide()
 		Bacc.P_card1 = 99
 		Bacc.P_card2 = 99
 		Bacc.P_card3 = 99
@@ -91,22 +89,22 @@ func ActionBuffer(d bool) {
 		Display.BaccRes = "Wait for Block..."
 	} else {
 		if rpc.Daemon.IsConnected() && Display.BaccRes != "Wait for Block..." {
-			Table.Actions.Show()
+			B.Actions.Show()
 		}
 	}
 
-	Table.Actions.Refresh()
+	B.Actions.Refresh()
 }
 
 // Disable Baccarat actions
 func disableBaccActions(d bool) {
 	if d {
-		Table.Actions.Hide()
+		B.Actions.Hide()
 	} else {
-		Table.Actions.Show()
+		B.Actions.Show()
 	}
 
-	Table.Actions.Refresh()
+	B.Actions.Refresh()
 }
 
 // Baccarat hand result display label
@@ -205,7 +203,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 		case "dReams":
 			Bacc.Contract = rpc.BaccSCID
 		default:
-			Bacc.Contract = Table.Map[s]
+			Bacc.Contract = Tables[s]
 		}
 		fetchBaccSC()
 		entry.SetText(Display.BaccMin)
@@ -219,14 +217,14 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 			table_select,
 			container.NewBorder(nil, nil, nil, search_button, search_entry)))
 
-	Table.Actions = container.NewVBox(
+	B.Actions = *container.NewVBox(
 		layout.NewSpacer(),
 		container.NewHBox(layout.NewSpacer(), actions),
 		search)
 
-	Table.Actions.Hide()
+	B.Actions.Hide()
 
-	return Table.Actions
+	return &B.Actions
 }
 
 // Baccarat table image
@@ -241,19 +239,19 @@ func BaccTable(img fyne.Resource) fyne.CanvasObject {
 // Gets list of current Baccarat tables from on chain store and refresh options
 func GetBaccTables() {
 	if rpc.Daemon.IsConnected() {
-		Table.Map = make(map[string]string)
+		Tables = make(map[string]string)
 		if table_map, ok := rpc.FindStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Rpc).(string); ok {
 			if str, err := hex.DecodeString(table_map); err == nil {
-				json.Unmarshal([]byte(str), &Table.Map)
+				json.Unmarshal([]byte(str), &Tables)
 			}
 		}
 
-		table_names := make([]string, 0, len(Table.Map))
-		for name := range Table.Map {
+		table_names := make([]string, 0, len(Tables))
+		for name := range Tables {
 			table_names = append(table_names, name)
 		}
 
-		table_select := Table.Actions.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Select)
+		table_select := B.Actions.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Select)
 		table_select.Options = []string{"dReams"}
 		table_select.Options = append(table_select.Options, table_names...)
 		table_select.Refresh()
@@ -294,18 +292,18 @@ func clearBaccCards() *fyne.Container {
 }
 
 // Refresh all Baccarat objects
-func BaccRefresh(b *dreams.DreamsItems, d dreams.DreamsObject) {
+func BaccRefresh(d dreams.DreamsObject) {
 	asset_name := rpc.GetAssetSCIDName(Bacc.AssetID)
-	b.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " " + asset_name + ", Max Bet is " + Display.BaccMax)
-	b.RightLabel.SetText(asset_name + " Balance: " + rpc.DisplayBalance(asset_name) + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
+	B.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " " + asset_name + ", Max Bet is " + Display.BaccMax)
+	B.RightLabel.SetText(asset_name + " Balance: " + rpc.DisplayBalance(asset_name) + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
 
 	if !Bacc.Display {
-		b.Front.Objects[0] = clearBaccCards()
+		B.Front.Objects[0] = clearBaccCards()
 		FetchBaccHand(Bacc.Last)
 		if Bacc.Found {
-			b.Front.Objects[0] = showBaccCards()
+			B.Front.Objects[0] = showBaccCards()
 		}
-		b.Front.Objects[0].Refresh()
+		B.Front.Objects[0].Refresh()
 	}
 
 	if rpc.Wallet.Height > Bacc.CHeight+3 && !Bacc.Found {
@@ -313,10 +311,10 @@ func BaccRefresh(b *dreams.DreamsItems, d dreams.DreamsObject) {
 		ActionBuffer(false)
 	}
 
-	b.Back.Objects[1].(*canvas.Text).Text = Display.BaccRes
-	b.Back.Objects[1].Refresh()
+	B.Back.Objects[1].(*canvas.Text).Text = Display.BaccRes
+	B.Back.Objects[1].Refresh()
 
-	b.DApp.Refresh()
+	B.DApp.Refresh()
 
 	if Bacc.Found && !Bacc.Notified {
 		if !d.IsWindows() {

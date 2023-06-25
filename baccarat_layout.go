@@ -9,25 +9,27 @@ import (
 	"fyne.io/fyne/v2/layout"
 )
 
+var B dreams.DreamsItems
+
 // Baccarat tab layout
-func LayoutAllItems(b *dreams.DreamsItems, d dreams.DreamsObject) *fyne.Container {
-	b.Back = *container.NewWithoutLayout(
+func LayoutAllItems(d dreams.DreamsObject) *fyne.Container {
+	B.Back = *container.NewWithoutLayout(
 		BaccTable(resourceBaccTablePng),
 		baccResult(Display.BaccRes))
 
-	b.Front = *clearBaccCards()
+	B.Front = *clearBaccCards()
 
-	bacc_label := container.NewHBox(b.LeftLabel, layout.NewSpacer(), b.RightLabel)
+	bacc_label := container.NewHBox(B.LeftLabel, layout.NewSpacer(), B.RightLabel)
 
-	b.DApp = container.NewVBox(
+	B.DApp = container.NewVBox(
 		dwidget.LabelColor(bacc_label),
-		&b.Back,
-		&b.Front,
+		&B.Back,
+		&B.Front,
 		layout.NewSpacer(),
 		baccaratButtons(d.Window))
 
 	// Main process
-	go fetch(b, d)
+	go fetch(d)
 
-	return b.DApp
+	return B.DApp
 }
