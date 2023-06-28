@@ -50,8 +50,8 @@ github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbi
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/SixofClubsss/Holdero v0.0.0-20230625085408-f0ad72079fcb h1:ao4bfABeajAZEv1SspHnx10yUrreZL0i+DSXPuu3oo4=
-github.com/SixofClubsss/Holdero v0.0.0-20230625085408-f0ad72079fcb/go.mod h1:+/19s6T2Z5Q9wp/6RgBNblY8Od/s0B5sD3uZWO8eGMs=
+github.com/SixofClubsss/Holdero v0.0.0-20230627185742-df359af5483d h1:3rWc1IcrOnJlYSMCJwIZQU2xDqm5ZwFl9uodV2Tt8/c=
+github.com/SixofClubsss/Holdero v0.0.0-20230627185742-df359af5483d/go.mod h1:XtKnJwLeZ3Bj2nPvycxRck3kl0fThRdPKfDNVxLjNyw=
 github.com/VictoriaMetrics/metrics v1.24.0 h1:ILavebReOjYctAGY5QU2F9X0MYvkcrG3aEn2RKa1Zkw=
 github.com/VictoriaMetrics/metrics v1.24.0/go.mod h1:eFT25kvsTidQFHb6U0oa0rTrDRdz4xTYjpL8+UPohys=
 github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
@@ -80,8 +80,8 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
-github.com/civilware/Gnomon v0.0.0-20230623143540-9e690b99277a h1:k7xf/uRkAitAOfXzXgtR8p1UXVabH/0F1IxonCHuAKA=
-github.com/civilware/Gnomon v0.0.0-20230623143540-9e690b99277a/go.mod h1:TyoMJDmnAWSxz8tnSYrdV8K6fkOnCAX78yQX/8l+OJw=
+github.com/civilware/Gnomon v0.0.0-20230627144738-10ead43c1bb7 h1:hCnVzCaj0ZMA6eA38NFpBNkPBoFeF9FP1Qjn2gTyexI=
+github.com/civilware/Gnomon v0.0.0-20230627144738-10ead43c1bb7/go.mod h1:TyoMJDmnAWSxz8tnSYrdV8K6fkOnCAX78yQX/8l+OJw=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/cncf/udpa/go v0.0.0-20200629203442-efcf912fb354/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
@@ -92,8 +92,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creachadair/jrpc2 v0.43.0 h1:sgYSOoAWXZ5cx9pd2pYH8dkrjCNdDpFwhO4ucMeUz7U=
 github.com/creachadair/jrpc2 v0.43.0/go.mod h1:oOdNFoMQQpSirGcSujG10NYl05K/IYrIUUNbh+/Xcd8=
-github.com/dReam-dApps/dReams v0.9.7-0.20230627073815-ba77deace9bf h1:c7HLwV6Vso3SdxsOsSFQRn++5EhXxCBnbi+FrSBYntM=
-github.com/dReam-dApps/dReams v0.9.7-0.20230627073815-ba77deace9bf/go.mod h1:1r927VRJ2gwEMC72MtLut6G6kY56lrpGB/Mk/9R+eyw=
+github.com/dReam-dApps/dReams v0.9.7-0.20230628000204-46d86e9eedff h1:isk0D9Ozm07GfoBr5jP5pphRiDdOIFgoKIpSJmxVdPY=
+github.com/dReam-dApps/dReams v0.9.7-0.20230628000204-46d86e9eedff/go.mod h1:FkWXvnPnahoBXeuzbphQJVekILHM42e5CFTNRc79fs8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
