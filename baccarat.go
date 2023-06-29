@@ -111,7 +111,7 @@ func baccResult(r string) *canvas.Text {
 
 // Baccarat action objects
 func baccaratButtons(w fyne.Window) fyne.CanvasObject {
-	entry := dwidget.DeroAmtEntry("", 1, 0)
+	entry := dwidget.NewDeroEntry("", 1, 0)
 	entry.PlaceHolder = "dReams:"
 	entry.AllowFloat = false
 	entry.SetText("10")

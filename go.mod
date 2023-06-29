@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	fyne.io/fyne/v2 v2.3.1
-	github.com/SixofClubsss/Holdero v0.0.0-20230627185742-df359af5483d
-	github.com/dReam-dApps/dReams v0.9.7-0.20230628000204-46d86e9eedff
+	github.com/SixofClubsss/Holdero v0.0.0-20230629043006-a437527bf87e
+	github.com/dReam-dApps/dReams v0.9.7-0.20230629035106-3a1bb0aa81fc
 	github.com/deroproject/derohe v0.0.0-20230604143809-765b2db1f482
 )
 
