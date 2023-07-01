@@ -50,8 +50,8 @@ github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbi
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/SixofClubsss/Holdero v0.0.0-20230630185956-24e50c247284 h1:aCJNeXUjtDipewenpFE05Brwg1GSatfk+Q28x7RmgC0=
-github.com/SixofClubsss/Holdero v0.0.0-20230630185956-24e50c247284/go.mod h1:r3k3dg5hr3V7HH9SCfXl9jLF3Jyga4Bhf6skY/APG2E=
+github.com/SixofClubsss/Holdero v0.0.0-20230701014232-92491e1cf993 h1:7w3MsMFag9aLeAy6dwMP2apXUCNIr7XGMKAL7a0nldU=
+github.com/SixofClubsss/Holdero v0.0.0-20230701014232-92491e1cf993/go.mod h1:r3k3dg5hr3V7HH9SCfXl9jLF3Jyga4Bhf6skY/APG2E=
 github.com/VictoriaMetrics/metrics v1.24.0 h1:ILavebReOjYctAGY5QU2F9X0MYvkcrG3aEn2RKa1Zkw=
 github.com/VictoriaMetrics/metrics v1.24.0/go.mod h1:eFT25kvsTidQFHb6U0oa0rTrDRdz4xTYjpL8+UPohys=
 github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
