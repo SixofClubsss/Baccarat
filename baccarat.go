@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"image/color"
 	"log"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -251,6 +252,42 @@ func GetBaccTables() {
 	}
 }
 
+// Set Baccarat player card images
+func playerCards(c1, c2, c3 int) fyne.CanvasObject {
+	card1 := holdero.DisplayCard(c1)
+	card2 := holdero.DisplayCard(c2)
+	card3 := holdero.DisplayCard(c3)
+
+	card1.Resize(fyne.NewSize(110, 150))
+	card1.Move(fyne.NewPos(180, 39))
+
+	card2.Resize(fyne.NewSize(110, 150))
+	card2.Move(fyne.NewPos(290, 39))
+
+	card3.Resize(fyne.NewSize(110, 150))
+	card3.Move(fyne.NewPos(400, 39))
+
+	return container.NewWithoutLayout(card1, card2, card3)
+}
+
+// Set Baccarat banker card images
+func bankerCards(c1, c2, c3 int) fyne.CanvasObject {
+	card1 := holdero.DisplayCard(c1)
+	card2 := holdero.DisplayCard(c2)
+	card3 := holdero.DisplayCard(c3)
+
+	card1.Resize(fyne.NewSize(110, 150))
+	card1.Move(fyne.NewPos(600, 39))
+
+	card2.Resize(fyne.NewSize(110, 150))
+	card2.Move(fyne.NewPos(710, 39))
+
+	card3.Resize(fyne.NewSize(110, 150))
+	card3.Move(fyne.NewPos(820, 39))
+
+	return container.NewWithoutLayout(card1, card2, card3)
+}
+
 // Place and refresh Baccarat card images
 func showBaccCards() *fyne.Container {
 	var drawP, drawB int
@@ -267,8 +304,8 @@ func showBaccCards() *fyne.Container {
 	}
 
 	content := *container.NewWithoutLayout(
-		holdero.PlayerCards(holdero.BaccSuit(Bacc.P_card1), holdero.BaccSuit(Bacc.P_card2), holdero.BaccSuit(drawP)),
-		holdero.BankerCards(holdero.BaccSuit(Bacc.B_card1), holdero.BaccSuit(Bacc.B_card2), holdero.BaccSuit(drawB)))
+		playerCards(baccSuit(Bacc.P_card1), baccSuit(Bacc.P_card2), baccSuit(drawP)),
+		bankerCards(baccSuit(Bacc.B_card1), baccSuit(Bacc.B_card2), baccSuit(drawB)))
 
 	Bacc.Display = true
 	ActionBuffer(false)
@@ -278,8 +315,8 @@ func showBaccCards() *fyne.Container {
 
 func clearBaccCards() *fyne.Container {
 	content := *container.NewWithoutLayout(
-		holdero.PlayerCards(99, 99, 99),
-		holdero.BankerCards(99, 99, 99))
+		playerCards(99, 99, 99),
+		bankerCards(99, 99, 99))
 
 	return &content
 }
@@ -314,4 +351,206 @@ func BaccRefresh(d *dreams.DreamsObject) {
 			Bacc.Notified = d.Notification("dReams - Baccarat", Display.BaccRes)
 		}
 	}
+}
+
+// Create a random suit for baccarat card
+func baccSuit(card int) (suited int) {
+	if card == 99 {
+		return 99
+	}
+
+	seed := rand.NewSource(time.Now().UnixNano())
+	y := rand.New(seed)
+	x := y.Intn(4) + 1
+
+	if card == 0 {
+		seed := rand.NewSource(time.Now().UnixNano())
+		y := rand.New(seed)
+		x := y.Intn(16) + 1
+
+		switch x {
+		case 1:
+			suited = 10
+		case 2:
+			suited = 11
+		case 3:
+			suited = 12
+		case 4:
+			suited = 13
+		case 5:
+			suited = 23
+		case 6:
+			suited = 24
+		case 7:
+			suited = 25
+		case 8:
+			suited = 26
+		case 9:
+			suited = 36
+		case 10:
+			suited = 37
+		case 11:
+			suited = 38
+		case 12:
+			suited = 39
+		case 13:
+			suited = 49
+		case 14:
+			suited = 50
+		case 15:
+			suited = 51
+		case 16:
+			suited = 52
+		}
+
+		return
+	}
+
+	switch card {
+	case 1:
+		switch x {
+		case 1:
+			suited = 1
+		case 2:
+			suited = 14
+		case 3:
+			suited = 27
+		case 4:
+			suited = 40
+		}
+	case 2:
+		switch x {
+		case 1:
+			suited = 2
+		case 2:
+			suited = 15
+		case 3:
+			suited = 28
+		case 4:
+			suited = 41
+		}
+	case 3:
+		switch x {
+		case 1:
+			suited = 3
+		case 2:
+			suited = 16
+		case 3:
+			suited = 29
+		case 4:
+			suited = 42
+		}
+	case 4:
+		switch x {
+		case 1:
+			suited = 4
+		case 2:
+			suited = 17
+		case 3:
+			suited = 30
+		case 4:
+			suited = 43
+		}
+	case 5:
+		switch x {
+		case 1:
+			suited = 5
+		case 2:
+			suited = 18
+		case 3:
+			suited = 31
+		case 4:
+			suited = 44
+		}
+	case 6:
+		switch x {
+		case 1:
+			suited = 6
+		case 2:
+			suited = 19
+		case 3:
+			suited = 32
+		case 4:
+			suited = 45
+		}
+	case 7:
+		switch x {
+		case 1:
+			suited = 7
+		case 2:
+			suited = 20
+		case 3:
+			suited = 33
+		case 4:
+			suited = 46
+		}
+	case 8:
+		switch x {
+		case 1:
+			suited = 8
+		case 2:
+			suited = 21
+		case 3:
+			suited = 34
+		case 4:
+			suited = 47
+		}
+	case 9:
+		switch x {
+		case 1:
+			suited = 9
+		case 2:
+			suited = 22
+		case 3:
+			suited = 35
+		case 4:
+			suited = 48
+		}
+	case 10:
+		switch x {
+		case 1:
+			suited = 10
+		case 2:
+			suited = 23
+		case 3:
+			suited = 36
+		case 4:
+			suited = 49
+		}
+	case 11:
+		switch x {
+		case 1:
+			suited = 11
+		case 2:
+			suited = 24
+		case 3:
+			suited = 37
+		case 4:
+			suited = 50
+		}
+	case 12:
+		switch x {
+		case 1:
+			suited = 12
+		case 2:
+			suited = 25
+		case 3:
+			suited = 38
+		case 4:
+			suited = 51
+		}
+	case 13:
+		switch x {
+		case 1:
+			suited = 13
+		case 2:
+			suited = 26
+		case 3:
+			suited = 39
+		case 4:
+			suited = 52
+		}
+	}
+
+	return
 }
