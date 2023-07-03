@@ -4,15 +4,16 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"image/color"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
 
 	holdero "github.com/SixofClubsss/Holdero"
+	"github.com/civilware/Gnomon/structures"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/dwidget"
 	"github.com/dReam-dApps/dReams/rpc"
+	"github.com/sirupsen/logrus"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -24,6 +25,7 @@ import (
 )
 
 var Tables map[string]string
+var logger = structures.Logger.WithFields(logrus.Fields{})
 
 func DreamsMenuIntro() (entries map[string][]string) {
 	entries = map[string][]string{
@@ -63,7 +65,7 @@ func fetch(d *dreams.DreamsObject) {
 			BaccRefresh(d)
 			d.WorkDone()
 		case <-d.CloseDapp():
-			log.Println("[Baccarat] Done")
+			logger.Println("[Baccarat] Done")
 			return
 		}
 	}

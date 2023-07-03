@@ -2,7 +2,6 @@ package baccarat
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/dReam-dApps/dReams/rpc"
@@ -55,7 +54,7 @@ func fetchBaccSC() {
 		}
 
 		if err := rpcClientD.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
-			log.Println("[FetchBaccSC]", err)
+			logger.Errorln("[FetchBaccSC]", err)
 			return
 		}
 
@@ -120,7 +119,7 @@ func FetchBaccHand(tx string) {
 		}
 
 		if err := rpcClientD.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
-			log.Println("[FetchBaccHand]", err)
+			logger.Errorln("[FetchBaccHand]", err)
 			return
 		}
 
@@ -168,7 +167,7 @@ func FetchBaccHand(tx string) {
 //   - w defines where bet is placed (player, banker or tie)
 func BaccBet(amt, w string) (tx string) {
 	if Bacc.AssetID == "" || len(Bacc.AssetID) != 64 {
-		log.Println("[Baccarat] Asset ID error")
+		logger.Errorln("[Baccarat] Asset ID error")
 		return "ID error"
 	}
 
@@ -198,20 +197,20 @@ func BaccBet(amt, w string) (tx string) {
 	}
 
 	if err := rpcClientW.CallFor(ctx, &txid, "transfer", params); err != nil {
-		log.Println("[BaccBet]", err)
+		logger.Errorln("[BaccBet]", err)
 		return
 	}
 
 	Bacc.Last = txid.TXID
 	Bacc.Notified = false
 	if w == "player" {
-		log.Println("[Baccarat] Player TX:", txid)
+		logger.Println("[Baccarat] Player TX:", txid)
 		rpc.AddLog("Baccarat Player TX: " + txid.TXID)
 	} else if w == "banker" {
-		log.Println("[Baccarat] Banker TX:", txid)
+		logger.Println("[Baccarat] Banker TX:", txid)
 		rpc.AddLog("Baccarat Banker TX: " + txid.TXID)
 	} else {
-		log.Println("[Baccarat] Tie TX:", txid)
+		logger.Println("[Baccarat] Tie TX:", txid)
 		rpc.AddLog("Baccarat Tie TX: " + txid.TXID)
 	}
 
