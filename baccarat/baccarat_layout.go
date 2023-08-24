@@ -11,10 +11,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var B dreams.DreamsItems
+var B dreams.ContainerStack
 
 // Baccarat tab layout
-func LayoutAllItems(d *dreams.DreamsObject) *fyne.Container {
+func LayoutAllItems(d *dreams.AppObject) *fyne.Container {
 	B.LeftLabel = widget.NewLabel("")
 	B.RightLabel = widget.NewLabel("")
 	B.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " dReams, Max Bet is " + Display.BaccMax)

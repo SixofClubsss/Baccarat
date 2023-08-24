@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	holdero "github.com/SixofClubsss/Holdero"
+	"github.com/SixofClubsss/Holdero/holdero"
 	"github.com/civilware/Gnomon/structures"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/dwidget"
@@ -39,7 +39,7 @@ func DreamsMenuIntro() (entries map[string][]string) {
 }
 
 // Function for when Baccarat tab is selected
-func OnTabSelected(d *dreams.DreamsObject) {
+func OnTabSelected(d *dreams.AppObject) {
 	GetBaccTables()
 	BaccRefresh(d)
 	if rpc.Wallet.IsConnected() && Bacc.Display {
@@ -48,7 +48,7 @@ func OnTabSelected(d *dreams.DreamsObject) {
 }
 
 // Main Baccarat process
-func fetch(d *dreams.DreamsObject) {
+func fetch(d *dreams.AppObject) {
 	Bacc.Display = true
 	time.Sleep(3 * time.Second)
 	for {
@@ -324,7 +324,7 @@ func clearBaccCards() *fyne.Container {
 }
 
 // Refresh all Baccarat objects
-func BaccRefresh(d *dreams.DreamsObject) {
+func BaccRefresh(d *dreams.AppObject) {
 	asset_name := rpc.GetAssetSCIDName(Bacc.AssetID)
 	B.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " " + asset_name + ", Max Bet is " + Display.BaccMax)
 	B.RightLabel.SetText(asset_name + " Balance: " + rpc.DisplayBalance(asset_name) + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
