@@ -4,16 +4,16 @@ go 1.20
 
 require (
 	fyne.io/fyne/v2 v2.3.1
-	github.com/SixofClubsss/Holdero v0.0.0-20230824165205-c4821c0ab7fd
+	fyne.io/x/fyne v0.0.0-20230411205836-1ca0ead20763
+	github.com/SixofClubsss/Holdero v0.0.0-20230826225032-ed7e36fe97fb
 	github.com/civilware/Gnomon v0.0.0-20230706132518-bda82e989415
-	github.com/dReam-dApps/dReams v0.10.1-0.20230822231833-ab399ba86cd5
+	github.com/dReam-dApps/dReams v0.10.1-0.20230826224434-3b5f55dae41d
 	github.com/deroproject/derohe v0.0.0-20230604143809-765b2db1f482
 	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
 	fyne.io/systray v1.10.1-0.20230602210930-b6a2d6ca2a7b // indirect
-	fyne.io/x/fyne v0.0.0-20230411205836-1ca0ead20763 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/caarlos0/env/v6 v6.10.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect

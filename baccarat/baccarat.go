@@ -3,9 +3,10 @@ package baccarat
 import (
 	"encoding/hex"
 	"encoding/json"
-	"image/color"
+	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/SixofClubsss/Holdero/holdero"
@@ -22,9 +23,11 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	xwidget "fyne.io/x/fyne/widget"
 )
 
 var Tables map[string]string
+var waiting *xwidget.AnimatedGif
 var logger = structures.Logger.WithFields(logrus.Fields{})
 
 func DreamsMenuIntro() (entries map[string][]string) {
@@ -42,14 +45,15 @@ func DreamsMenuIntro() (entries map[string][]string) {
 func OnTabSelected(d *dreams.AppObject) {
 	GetBaccTables()
 	BaccRefresh(d)
-	if rpc.Wallet.IsConnected() && Bacc.Display {
+	if rpc.Wallet.IsConnected() && bacc.displayed {
 		ActionBuffer(false)
 	}
 }
 
 // Main Baccarat process
 func fetch(d *dreams.AppObject) {
-	Bacc.Display = true
+	bacc.found = true
+	bacc.displayed = true
 	time.Sleep(3 * time.Second)
 	for {
 		select {
@@ -74,17 +78,18 @@ func fetch(d *dreams.AppObject) {
 // Baccarat object buffer when action triggered
 func ActionBuffer(d bool) {
 	if d {
+		B.Front.Objects[0] = clearBaccCards()
 		B.Actions.Hide()
-		Bacc.P_card1 = 99
-		Bacc.P_card2 = 99
-		Bacc.P_card3 = 99
-		Bacc.B_card1 = 99
-		Bacc.B_card2 = 99
-		Bacc.B_card3 = 99
-		Bacc.Last = ""
-		Display.BaccRes = "Wait for Block..."
+		bacc.player.card1 = 99
+		bacc.player.card2 = 99
+		bacc.player.card3 = 99
+		bacc.banker.card1 = 99
+		bacc.banker.card2 = 99
+		bacc.banker.card3 = 99
+		bacc.last = ""
+		bacc.display.result = "Wait for Block..."
 	} else {
-		if rpc.Daemon.IsConnected() && Display.BaccRes != "Wait for Block..." {
+		if rpc.Daemon.IsConnected() && bacc.display.result != "Wait for Block..." {
 			B.Actions.Show()
 		}
 	}
@@ -103,13 +108,32 @@ func disableBaccActions(d bool) {
 	B.Actions.Refresh()
 }
 
-// Baccarat hand result display label
-func baccResult(r string) *canvas.Text {
-	label := canvas.NewText(r, color.White)
-	label.Move(fyne.NewPos(564, 237))
-	label.Alignment = fyne.TextAlignCenter
-
-	return label
+// When bet is placed start waiting gif and show txid dialog
+func placeBet(amt, where, title string, w fyne.Window) {
+	bacc.wait = true
+	ActionBuffer(true)
+	bacc.found = false
+	bacc.displayed = false
+	B.Back.Objects[1].(*canvas.Text).Text = bacc.display.result
+	B.Back.Objects[1].Refresh()
+	waiting.Start()
+	waiting.Show()
+	if tx := BaccBet(amt, where); tx == "ID error" {
+		dialog.NewInformation("Baccarat", "Select a table", w).Show()
+	} else {
+		go func() {
+			info := dialog.NewInformation(title, fmt.Sprintf("TXID: %s", tx), w)
+			info.SetDismissText("Copy")
+			info.SetOnClosed(func() {
+				w.Clipboard().SetContent(tx)
+			})
+			info.Show()
+			time.Sleep(3 * time.Second)
+			info.Hide()
+			info = nil
+		}()
+	}
+	bacc.wait = false
 }
 
 // Baccarat action objects
@@ -122,47 +146,65 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	entry.OnChanged = func(s string) {
 		if rpc.Daemon.IsConnected() {
 			if f, err := strconv.ParseFloat(s, 64); err == nil {
-				if f < Bacc.MinBet {
-					entry.SetText(Display.BaccMin)
+				if f < bacc.minBet {
+					entry.SetText(bacc.display.tableMin)
 				}
 
-				if f > Bacc.MaxBet {
-					entry.SetText(Display.BaccMax)
+				if f > bacc.maxBet {
+					entry.SetText(bacc.display.tableMax)
 				}
 			}
 
 			if entry.Validate() != nil {
-				entry.SetText(Display.BaccMin)
+				entry.SetText(bacc.display.tableMin)
 			}
 		}
 	}
 
-	player_button := widget.NewButton("Player", func() {
-		ActionBuffer(true)
-		Bacc.Found = false
-		Bacc.Display = false
-		if tx := BaccBet(entry.Text, "player"); tx == "ID error" {
-			dialog.NewInformation("Baccarat", "Select a table", w).Show()
-		}
-	})
+	confirmations := widget.NewCheck("Bet confirmation", nil)
+	confirmations.SetChecked(true)
 
-	banker_button := widget.NewButton("Banker", func() {
-		ActionBuffer(true)
-		Bacc.Found = false
-		Bacc.Display = false
-		if tx := BaccBet(entry.Text, "banker"); tx == "ID error" {
-			dialog.NewInformation("Baccarat", "Select a table", w).Show()
+	player_button := widget.NewButton("Player", nil)
+	player_button.OnTapped = func() {
+		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), player_button.Text)
+		if confirmations.Checked {
+			dialog.NewConfirm("Confirm", title, func(b bool) {
+				if b {
+					placeBet(entry.Text, strings.ToLower(player_button.Text), title, w)
+				}
+			}, w).Show()
+		} else {
+			placeBet(entry.Text, strings.ToLower(player_button.Text), title, w)
 		}
-	})
+	}
 
-	tie_button := widget.NewButton("Tie", func() {
-		ActionBuffer(true)
-		Bacc.Found = false
-		Bacc.Display = false
-		if tx := BaccBet(entry.Text, "tie"); tx == "ID error" {
-			dialog.NewInformation("Baccarat", "Select a table", w).Show()
+	banker_button := widget.NewButton("Banker", nil)
+	banker_button.OnTapped = func() {
+		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), banker_button.Text)
+		if confirmations.Checked {
+			dialog.NewConfirm("Confirm", title, func(b bool) {
+				if b {
+					placeBet(entry.Text, strings.ToLower(banker_button.Text), title, w)
+				}
+			}, w).Show()
+		} else {
+			placeBet(entry.Text, strings.ToLower(banker_button.Text), title, w)
 		}
-	})
+	}
+
+	tie_button := widget.NewButton("Tie", nil)
+	tie_button.OnTapped = func() {
+		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), tie_button.Text)
+		if confirmations.Checked {
+			dialog.NewConfirm("Confirm", title, func(b bool) {
+				if b {
+					placeBet(entry.Text, strings.ToLower(tie_button.Text), title, w)
+				}
+			}, w).Show()
+		} else {
+			placeBet(entry.Text, strings.ToLower(tie_button.Text), title, w)
+		}
+	}
 
 	amt_box := container.NewHScroll(entry)
 	amt_box.SetMinSize(fyne.NewSize(100, 40))
@@ -178,31 +220,43 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	search_entry.SetPlaceHolder("TXID:")
 	search_button := widget.NewButton("     Search    ", func() {
 		txid := search_entry.Text
-		if len(txid) == 64 && txid != searched {
-			searched = txid
-			ActionBuffer(true)
-			Display.BaccRes = "Searching..."
-			Bacc.Found = false
-			Bacc.Display = false
-			FetchBaccHand(txid)
-			if !Bacc.Found {
-				Display.BaccRes = "Hand Not Found"
-				ActionBuffer(false)
+		if len(txid) == 64 {
+			if txid != searched {
+				searched = txid
+				ActionBuffer(true)
+				bacc.display.result = "Searching..."
+				B.Back.Objects[1].(*canvas.Text).Text = bacc.display.result
+				B.Back.Objects[1].Refresh()
+				bacc.found = false
+				bacc.displayed = false
+				FetchBaccHand(txid)
+				if !bacc.found {
+					searched = ""
+					dialog.NewInformation("Search", "No results found", w).Show()
+					ActionBuffer(false)
+					bacc.display.result = ""
+					B.Back.Objects[1].(*canvas.Text).Text = bacc.display.result
+					B.Back.Objects[1].Refresh()
+				}
 			}
+
+			return
 		}
+
+		dialog.NewInformation("Search", "Not a valid SCID", w).Show()
 	})
 
-	Display.BaccMin = "10"
+	bacc.display.tableMin = "10"
 	table_opts := []string{"dReams"}
 	table_select := widget.NewSelect(table_opts, func(s string) {
 		switch s {
 		case "dReams":
-			Bacc.Contract = rpc.BaccSCID
+			bacc.contract = rpc.BaccSCID
 		default:
-			Bacc.Contract = Tables[s]
+			bacc.contract = Tables[s]
 		}
 		fetchBaccSC()
-		entry.SetText(Display.BaccMin)
+		entry.SetText(bacc.display.tableMin)
 	})
 	table_select.PlaceHolder = "Select Table:"
 	table_select.SetSelectedIndex(0)
@@ -210,7 +264,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	search := container.NewVBox(
 		layout.NewSpacer(),
 		container.NewAdaptiveGrid(2,
-			table_select,
+			container.NewBorder(nil, nil, widget.NewLabel("Table:"), confirmations, table_select),
 			container.NewBorder(nil, nil, nil, search_button, search_entry)))
 
 	B.Actions = *container.NewVBox(
@@ -223,13 +277,34 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	return &B.Actions
 }
 
-// Baccarat table image
+// Baccarat table image and waiting gif
 func BaccTable(img fyne.Resource) fyne.CanvasObject {
 	table_img := canvas.NewImageFromResource(img)
 	table_img.Resize(fyne.NewSize(1100, 600))
 	table_img.Move(fyne.NewPos(5, 0))
 
-	return table_img
+	var err error
+	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
+	if err != nil {
+		logger.Errorln("[Baccarat] Err loading gif")
+		return container.NewMax()
+	}
+	waiting.SetMinSize(fyne.NewSize(100, 100))
+
+	waiting_cont := container.NewMax(waiting)
+	waiting_cont.Move(fyne.NewPos(506, 137))
+	waiting.Hide()
+
+	return container.NewWithoutLayout(table_img, waiting_cont)
+}
+
+// Stop and hide the waiting gif
+func stopGif() {
+	if waiting != nil {
+		waiting.Hide()
+		waiting.Stop()
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 // Gets list of current Baccarat tables from on chain store and refresh options
@@ -293,23 +368,23 @@ func bankerCards(c1, c2, c3 int) fyne.CanvasObject {
 // Place and refresh Baccarat card images
 func showBaccCards() *fyne.Container {
 	var drawP, drawB int
-	if Bacc.P_card3 == 0 {
+	if bacc.player.card3 == 0 {
 		drawP = 99
 	} else {
-		drawP = Bacc.P_card3
+		drawP = bacc.player.card3
 	}
 
-	if Bacc.B_card3 == 0 {
+	if bacc.banker.card3 == 0 {
 		drawB = 99
 	} else {
-		drawB = Bacc.B_card3
+		drawB = bacc.banker.card3
 	}
 
 	content := *container.NewWithoutLayout(
-		playerCards(baccSuit(Bacc.P_card1), baccSuit(Bacc.P_card2), baccSuit(drawP)),
-		bankerCards(baccSuit(Bacc.B_card1), baccSuit(Bacc.B_card2), baccSuit(drawB)))
+		playerCards(baccSuit(bacc.player.card1), baccSuit(bacc.player.card2), baccSuit(drawP)),
+		bankerCards(baccSuit(bacc.banker.card1), baccSuit(bacc.banker.card2), baccSuit(drawB)))
 
-	Bacc.Display = true
+	bacc.displayed = true
 	ActionBuffer(false)
 
 	return &content
@@ -325,34 +400,41 @@ func clearBaccCards() *fyne.Container {
 
 // Refresh all Baccarat objects
 func BaccRefresh(d *dreams.AppObject) {
-	asset_name := rpc.GetAssetSCIDName(Bacc.AssetID)
-	B.LeftLabel.SetText("Total Hands Played: " + Display.Total_w + "      Player Wins: " + Display.Player_w + "      Ties: " + Display.Ties + "      Banker Wins: " + Display.Banker_w + "      Min Bet is " + Display.BaccMin + " " + asset_name + ", Max Bet is " + Display.BaccMax)
+	asset_name := rpc.GetAssetSCIDName(bacc.assetID)
+	B.LeftLabel.SetText("Total Hands Played: " + bacc.display.stats.total + "      Player Wins: " + bacc.display.stats.player + "      Ties: " + bacc.display.stats.ties + "      Banker Wins: " + bacc.display.stats.banker + "      Min Bet is " + bacc.display.tableMin + " " + asset_name + ", Max Bet is " + bacc.display.tableMax)
 	B.RightLabel.SetText(asset_name + " Balance: " + rpc.DisplayBalance(asset_name) + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
 
-	if !Bacc.Display {
+	if !bacc.displayed {
 		B.Front.Objects[0] = clearBaccCards()
-		FetchBaccHand(Bacc.Last)
-		if Bacc.Found {
+		FetchBaccHand(bacc.last)
+		if bacc.found {
+			stopGif()
 			B.Front.Objects[0] = showBaccCards()
+			if !bacc.notified {
+				if !d.IsWindows() {
+					bacc.notified = d.Notification("dReams - Baccarat", bacc.display.result)
+				}
+			}
 		}
 		B.Front.Objects[0].Refresh()
 	}
 
-	if rpc.Wallet.Height > Bacc.CHeight+3 && !Bacc.Found {
-		Display.BaccRes = ""
+	if !bacc.wait && rpc.Wallet.Height > bacc.cHeight+4 && !bacc.found {
+		bacc.display.result = ""
 		ActionBuffer(false)
+		stopGif()
 	}
 
-	B.Back.Objects[1].(*canvas.Text).Text = Display.BaccRes
+	if B.Actions.Hidden {
+		if bacc.found && rpc.Wallet.IsConnected() {
+			ActionBuffer(false)
+		}
+	}
+
+	B.Back.Objects[1].(*canvas.Text).Text = bacc.display.result
 	B.Back.Objects[1].Refresh()
 
 	B.DApp.Refresh()
-
-	if Bacc.Found && !Bacc.Notified {
-		if !d.IsWindows() {
-			Bacc.Notified = d.Notification("dReams - Baccarat", Display.BaccRes)
-		}
-	}
 }
 
 // Create a random suit for baccarat card

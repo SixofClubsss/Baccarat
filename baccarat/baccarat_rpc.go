@@ -9,36 +9,39 @@ import (
 	dero "github.com/deroproject/derohe/rpc"
 )
 
-type displayStrings struct {
-	Total_w  string
-	Player_w string
-	Banker_w string
-	Ties     string
-	BaccMax  string
-	BaccMin  string
-	BaccRes  string
+type cards struct {
+	card1 int
+	card2 int
+	card3 int
 }
 
 type baccValues struct {
-	P_card1  int
-	P_card2  int
-	P_card3  int
-	B_card1  int
-	B_card2  int
-	B_card3  int
-	CHeight  int
-	MinBet   float64
-	MaxBet   float64
-	AssetID  string
-	Contract string
-	Last     string
-	Found    bool
-	Display  bool
-	Notified bool
+	player    cards
+	banker    cards
+	cHeight   int
+	minBet    float64
+	maxBet    float64
+	assetID   string
+	contract  string
+	last      string
+	found     bool
+	displayed bool
+	notified  bool
+	wait      bool
+	display   struct {
+		tableMax string
+		tableMin string
+		result   string
+		stats    struct {
+			total  string
+			player string
+			banker string
+			ties   string
+		}
+	}
 }
 
-var Display displayStrings
-var Bacc baccValues
+var bacc baccValues
 
 // Get Baccarat SC data
 func fetchBaccSC() {
@@ -48,7 +51,7 @@ func fetchBaccSC() {
 
 		var result *dero.GetSC_Result
 		params := dero.GetSC_Params{
-			SCID:      Bacc.Contract,
+			SCID:      bacc.contract,
 			Code:      false,
 			Variables: true,
 		}
@@ -68,39 +71,39 @@ func fetchBaccSC() {
 		// Pot_jv = result.Balances[dReamsSCID]
 		// Pot_jv = result.Balances["0000000000000000000000000000000000000000000000000000000000000000"]
 		if Asset_jv != nil {
-			Bacc.AssetID = fmt.Sprint(Asset_jv)
+			bacc.assetID = fmt.Sprint(Asset_jv)
 		}
 
 		if Total_jv != nil {
-			Display.Total_w = fmt.Sprint(Total_jv)
+			bacc.display.stats.total = fmt.Sprint(Total_jv)
 		}
 
 		if Player_jv != nil {
-			Display.Player_w = fmt.Sprint(Player_jv)
+			bacc.display.stats.player = fmt.Sprint(Player_jv)
 		}
 
 		if Banker_jv != nil {
-			Display.Banker_w = fmt.Sprint(Banker_jv)
+			bacc.display.stats.banker = fmt.Sprint(Banker_jv)
 		}
 
 		if Ties_jv != nil {
-			Display.Ties = fmt.Sprint(Ties_jv)
+			bacc.display.stats.ties = fmt.Sprint(Ties_jv)
 		}
 
 		if max, ok := Max_jv.(float64); ok {
-			Display.BaccMax = fmt.Sprintf("%.0f", max/100000)
-			Bacc.MaxBet = max / 100000
+			bacc.display.tableMax = fmt.Sprintf("%.0f", max/100000)
+			bacc.maxBet = max / 100000
 		} else {
-			Display.BaccMax = "250"
-			Bacc.MaxBet = 250
+			bacc.display.tableMax = "250"
+			bacc.maxBet = 250
 		}
 
 		if min, ok := Min_jv.(float64); ok {
-			Display.BaccMin = fmt.Sprintf("%.0f", min/100000)
-			Bacc.MinBet = min / 100000
+			bacc.display.tableMin = fmt.Sprintf("%.0f", min/100000)
+			bacc.minBet = min / 100000
 		} else {
-			Display.BaccMin = "10"
-			Bacc.MinBet = 10
+			bacc.display.tableMin = "10"
+			bacc.minBet = 10
 		}
 	}
 }
@@ -113,7 +116,7 @@ func FetchBaccHand(tx string) {
 
 		var result *dero.GetSC_Result
 		params := dero.GetSC_Params{
-			SCID:      Bacc.Contract,
+			SCID:      bacc.contract,
 			Code:      false,
 			Variables: true,
 		}
@@ -131,28 +134,27 @@ func FetchBaccHand(tx string) {
 			for i < start+45 {
 				h := "-Hand#TXID:"
 				w := strconv.Itoa(i)
-				TXID_jv := result.VariableStringKeys[w+h]
 
-				if TXID_jv != nil {
-					if TXID_jv.(string) == tx {
-						Bacc.Found = true
-						Bacc.P_card1 = rpc.IntType(result.VariableStringKeys[w+"-Player x:"])
-						Bacc.P_card2 = rpc.IntType(result.VariableStringKeys[w+"-Player y:"])
-						Bacc.P_card3 = rpc.IntType(result.VariableStringKeys[w+"-Player z:"])
-						Bacc.B_card1 = rpc.IntType(result.VariableStringKeys[w+"-Banker x:"])
-						Bacc.B_card2 = rpc.IntType(result.VariableStringKeys[w+"-Banker y:"])
-						Bacc.B_card3 = rpc.IntType(result.VariableStringKeys[w+"-Banker z:"])
+				if txid, ok := result.VariableStringKeys[w+h].(string); ok {
+					if txid == tx {
+						bacc.found = true
+						bacc.player.card1 = rpc.IntType(result.VariableStringKeys[w+"-Player x:"])
+						bacc.player.card2 = rpc.IntType(result.VariableStringKeys[w+"-Player y:"])
+						bacc.player.card3 = rpc.IntType(result.VariableStringKeys[w+"-Player z:"])
+						bacc.banker.card1 = rpc.IntType(result.VariableStringKeys[w+"-Banker x:"])
+						bacc.banker.card2 = rpc.IntType(result.VariableStringKeys[w+"-Banker y:"])
+						bacc.banker.card3 = rpc.IntType(result.VariableStringKeys[w+"-Banker z:"])
 						PTotal_jv := result.VariableStringKeys[w+"-Player total:"]
 						BTotal_jv := result.VariableStringKeys[w+"-Banker total:"]
 
 						p := rpc.IntType(PTotal_jv)
 						b := rpc.IntType(BTotal_jv)
 						if rpc.IntType(PTotal_jv) == rpc.IntType(BTotal_jv) {
-							Display.BaccRes = fmt.Sprintf("Hand# %s Tie, %d & %d", w, p, b)
+							bacc.display.result = fmt.Sprintf("Hand# %s Tie, %d & %d", w, p, b)
 						} else if rpc.IntType(PTotal_jv) > rpc.IntType(BTotal_jv) {
-							Display.BaccRes = fmt.Sprintf("Hand# %s Player Wins, %d over %d", w, p, b)
+							bacc.display.result = fmt.Sprintf("Hand# %s Player Wins, %d over %d", w, p, b)
 						} else {
-							Display.BaccRes = fmt.Sprintf("Hand# %s Banker Wins, %d over %d", w, b, p)
+							bacc.display.result = fmt.Sprintf("Hand# %s Banker Wins, %d over %d", w, b, p)
 						}
 					}
 				}
@@ -166,7 +168,7 @@ func FetchBaccHand(tx string) {
 //   - amt to bet
 //   - w defines where bet is placed (player, banker or tie)
 func BaccBet(amt, w string) (tx string) {
-	if Bacc.AssetID == "" || len(Bacc.AssetID) != 64 {
+	if bacc.assetID == "" || len(bacc.assetID) != 64 {
 		logger.Errorln("[Baccarat] Asset ID error")
 		return "ID error"
 	}
@@ -180,17 +182,17 @@ func BaccBet(amt, w string) (tx string) {
 	txid := dero.Transfer_Result{}
 
 	t1 := dero.Transfer{
-		SCID:        crypto.HashHexToHash(Bacc.AssetID),
+		SCID:        crypto.HashHexToHash(bacc.assetID),
 		Destination: "dero1qyr8yjnu6cl2c5yqkls0hmxe6rry77kn24nmc5fje6hm9jltyvdd5qq4hn5pn",
 		Amount:      0,
 		Burn:        rpc.ToAtomic(amt, 1),
 	}
 
 	t := []dero.Transfer{t1}
-	fee := rpc.GasEstimate(Bacc.Contract, "[Baccarat]", args, t, rpc.LowLimitFee)
+	fee := rpc.GasEstimate(bacc.contract, "[Baccarat]", args, t, rpc.LowLimitFee)
 	params := &dero.Transfer_Params{
 		Transfers: t,
-		SC_ID:     Bacc.Contract,
+		SC_ID:     bacc.contract,
 		SC_RPC:    args,
 		Ringsize:  2,
 		Fees:      fee,
@@ -201,8 +203,8 @@ func BaccBet(amt, w string) (tx string) {
 		return
 	}
 
-	Bacc.Last = txid.TXID
-	Bacc.Notified = false
+	bacc.last = txid.TXID
+	bacc.notified = false
 	if w == "player" {
 		logger.Println("[Baccarat] Player TX:", txid)
 		rpc.AddLog("Baccarat Player TX: " + txid.TXID)
@@ -214,7 +216,7 @@ func BaccBet(amt, w string) (tx string) {
 		rpc.AddLog("Baccarat Tie TX: " + txid.TXID)
 	}
 
-	Bacc.CHeight = rpc.Wallet.Height
+	bacc.cHeight = rpc.Wallet.Height
 
 	return txid.TXID
 }

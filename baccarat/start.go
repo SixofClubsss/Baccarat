@@ -13,12 +13,14 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/widget"
 	"github.com/SixofClubsss/Holdero/holdero"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/bundle"
 	"github.com/dReam-dApps/dReams/dwidget"
 	"github.com/dReam-dApps/dReams/menu"
 	"github.com/dReam-dApps/dReams/rpc"
+	"github.com/sirupsen/logrus"
 )
 
 const app_tag = "Baccarat"
@@ -27,10 +29,11 @@ const app_tag = "Baccarat"
 func StartApp() {
 	n := runtime.NumCPU()
 	runtime.GOMAXPROCS(n)
-	menu.InitLogrusLog(runtime.GOOS == "windows")
+	menu.InitLogrusLog(logrus.InfoLevel)
 	config := menu.ReadDreamsConfig(app_tag)
 
-	a := app.New()
+	// Initialize Fyne app and window
+	a := app.NewWithID(fmt.Sprintf("%s Desktop Client", app_tag))
 	a.Settings().SetTheme(bundle.DeroTheme(config.Skin))
 	w := a.NewWindow(app_tag)
 	w.SetIcon(holdero.ResourcePokerBotIconPng)
@@ -38,27 +41,37 @@ func StartApp() {
 	w.SetMaster()
 	done := make(chan struct{})
 
+	// Initialize dReams AppObject and close func
 	dreams.Theme.Img = *canvas.NewImageFromResource(nil)
 	d := dreams.AppObject{
+		App:        a,
 		Window:     w,
 		Background: container.NewMax(&dreams.Theme.Img),
 	}
 	d.SetChannels(1)
 
 	closeFunc := func() {
-		menu.WriteDreamsConfig(
-			dreams.SaveData{
-				Skin:   config.Skin,
-				Daemon: []string{rpc.Daemon.Rpc},
-				DBtype: menu.Gnomes.DBType,
-			})
+		save := dreams.SaveData{
+			Skin:   config.Skin,
+			DBtype: menu.Gnomes.DBType,
+		}
+
+		if rpc.Daemon.Rpc == "" {
+			save.Daemon = config.Daemon
+		} else {
+			save.Daemon = []string{rpc.Daemon.Rpc}
+		}
+
+		menu.WriteDreamsConfig(save)
+		menu.CloseAppSignal(true)
 		menu.Gnomes.Stop(app_tag)
 		d.StopProcess()
 		w.Close()
 	}
 
-	w.SetCloseIntercept(func() { closeFunc() })
+	w.SetCloseIntercept(closeFunc)
 
+	// Handle ctrl-c close
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -67,11 +80,13 @@ func StartApp() {
 		closeFunc()
 	}()
 
+	// Initialize vars
 	rpc.InitBalances()
 
+	// Stand alone process
 	go func() {
 		time.Sleep(3 * time.Second)
-		ticker := time.NewTicker(6 * time.Second)
+		ticker := time.NewTicker(3 * time.Second)
 		for {
 			select {
 			case <-ticker.C:
@@ -82,6 +97,13 @@ func StartApp() {
 
 				if rpc.Daemon.IsConnected() {
 					rpc.Startup = false
+				}
+
+				if rpc.Wallet.IsConnected() {
+					menu.Assets.Swap.Show()
+					menu.Assets.Balances.Refresh()
+				} else {
+					menu.Assets.Swap.Hide()
 				}
 
 				d.SignalChannel()
@@ -97,6 +119,7 @@ func StartApp() {
 		}
 	}()
 
+	// Create dwidget connection box with controls
 	connect_box := dwidget.NewHorizontalEntries(app_tag, 1)
 	connect_box.Button.OnTapped = func() {
 		rpc.GetAddress(app_tag)
@@ -104,14 +127,29 @@ func StartApp() {
 	}
 
 	connect_box.AddDaemonOptions(config.Daemon)
-
 	connect_box.Container.Objects[0].(*fyne.Container).Add(menu.StartIndicators())
 
-	max := container.NewMax(d.Background, LayoutAllItems(&d))
+	// Initialize asset widgets
+	asset_selects := []fyne.Widget{
+		menu.NameEntry().(*fyne.Container).Objects[1].(*widget.Select),
+		holdero.FaceSelect(),
+		holdero.BackSelect(),
+		dreams.ThemeSelect(),
+		holdero.AvatarSelect(menu.Assets.Asset_map),
+	}
+
+	// Layout tabs
+	tabs := container.NewAppTabs(
+		container.NewTabItem(app_tag, LayoutAllItems(&d)),
+		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourcePokerBotIconPng, d.Window)),
+		container.NewTabItem("Swap", PlaceSwap()),
+		container.NewTabItem("Log", rpc.SessionLog()))
+
+	tabs.SetTabLocation(container.TabLocationBottom)
 
 	go func() {
 		time.Sleep(450 * time.Millisecond)
-		w.SetContent(container.NewBorder(nil, container.NewVBox(layout.NewSpacer(), connect_box.Container), nil, nil, max))
+		w.SetContent(container.NewMax(d.Background, container.NewMax(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connect_box.Container)))
 	}()
 
 	w.ShowAndRun()
