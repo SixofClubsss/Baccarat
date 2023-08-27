@@ -322,7 +322,7 @@ func GetBaccTables() {
 			table_names = append(table_names, name)
 		}
 
-		table_select := B.Actions.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Select)
+		table_select := B.Actions.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Select)
 		table_select.Options = []string{"dReams"}
 		table_select.Options = append(table_select.Options, table_names...)
 		table_select.Refresh()
