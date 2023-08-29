@@ -3,7 +3,7 @@ On chain Baccarat.
 
 Written in Go and using [Fyne Toolkit](https://fyne.io/), Baccarat is built on Dero's private L1. Powered by [Gnomon](https://github.com/civilware/Gnomon) and [dReams](https://github.com/dReam-dApps/dReams), it is closely modeled after the real world game of Baccarat. The tables are each individually owned and operated. Cards and betting are handled on chain in a verifiable manner and your account balances remain private while playing.
 
-![goMod](https://img.shields.io/github/go-mod/go-version/SixofClubsss/Baccarat.svg)![goReport](https://goreportcard.com/badge/github.com/SixofClubsss/Baccarat)[![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/SixofClubsss/Baccarat)
+![goMod](https://img.shields.io/github/go-mod/go-version/SixofClubsss/Baccarat.svg)![goReport](https://goreportcard.com/badge/github.com/SixofClubsss/Baccarat)[![goDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/SixofClubsss/Baccarat)
 
 Baccarat dApp is available for download from [dReams](https://dreamdapps.io).
 
