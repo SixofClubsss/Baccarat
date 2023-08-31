@@ -85,6 +85,7 @@ func StartApp() {
 
 	// Stand alone process
 	go func() {
+		logger.Printf("[%s] %s %s %s", app_tag, rpc.DREAMSv, runtime.GOOS, runtime.GOARCH)
 		time.Sleep(3 * time.Second)
 		ticker := time.NewTicker(3 * time.Second)
 		for {
