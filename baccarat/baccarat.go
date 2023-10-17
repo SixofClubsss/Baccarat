@@ -287,11 +287,11 @@ func BaccTable(img fyne.Resource) fyne.CanvasObject {
 	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
 	if err != nil {
 		logger.Errorln("[Baccarat] Err loading gif")
-		return container.NewMax()
+		return container.NewStack()
 	}
 	waiting.SetMinSize(fyne.NewSize(100, 100))
 
-	waiting_cont := container.NewMax(waiting)
+	waiting_cont := container.NewStack(waiting)
 	waiting_cont.Move(fyne.NewPos(506, 137))
 	waiting.Hide()
 

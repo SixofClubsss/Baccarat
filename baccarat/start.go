@@ -46,7 +46,7 @@ func StartApp() {
 	d := dreams.AppObject{
 		App:        a,
 		Window:     w,
-		Background: container.NewMax(&dreams.Theme.Img),
+		Background: container.NewStack(&dreams.Theme.Img),
 	}
 	d.SetChannels(1)
 
@@ -150,7 +150,7 @@ func StartApp() {
 
 	go func() {
 		time.Sleep(450 * time.Millisecond)
-		w.SetContent(container.NewMax(d.Background, container.NewMax(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connect_box.Container)))
+		w.SetContent(container.NewStack(d.Background, container.NewStack(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connect_box.Container)))
 	}()
 
 	w.ShowAndRun()

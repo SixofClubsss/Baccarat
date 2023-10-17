@@ -47,7 +47,7 @@ func PlaceSwap() *container.Split {
 	var swap_entry *dwidget.DeroAmts
 	var swap_boxes *fyne.Container
 
-	max := container.NewMax()
+	max := container.NewStack()
 	swap_tabs := container.NewAppTabs()
 
 	swap_button := widget.NewButton("Swap", nil)
@@ -91,7 +91,7 @@ func PlaceSwap() *container.Split {
 	swap_tabs = container.NewAppTabs(container.NewTabItem("Swap", container.NewCenter(menu.Assets.Swap)))
 	max.Add(swap_tabs)
 
-	full := container.NewHSplit(container.NewMax(bundle.NewAlpha120(), balance_tabs), max)
+	full := container.NewHSplit(container.NewStack(bundle.NewAlpha120(), balance_tabs), max)
 	full.SetOffset(0.66)
 
 	return full
