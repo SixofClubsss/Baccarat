@@ -143,7 +143,7 @@ func StartApp() {
 	tabs := container.NewAppTabs(
 		container.NewTabItem(app_tag, LayoutAllItems(&d)),
 		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourcePokerBotIconPng, d.Window)),
-		container.NewTabItem("Swap", PlaceSwap()),
+		container.NewTabItem("Swap", holdero.PlaceSwap()),
 		container.NewTabItem("Log", rpc.SessionLog()))
 
 	tabs.SetTabLocation(container.TabLocationBottom)
