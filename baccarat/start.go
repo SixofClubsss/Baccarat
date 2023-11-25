@@ -85,7 +85,6 @@ func StartApp() {
 
 	// Stand alone process
 	go func() {
-		logger.Printf("[%s] %s %s %s", app_tag, rpc.DREAMSv, runtime.GOOS, runtime.GOARCH)
 		time.Sleep(3 * time.Second)
 		ticker := time.NewTicker(3 * time.Second)
 		for {
@@ -144,7 +143,7 @@ func StartApp() {
 		container.NewTabItem(app_tag, LayoutAllItems(&d)),
 		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourcePokerBotIconPng, d.Window)),
 		container.NewTabItem("Swap", holdero.PlaceSwap()),
-		container.NewTabItem("Log", rpc.SessionLog()))
+		container.NewTabItem("Log", rpc.SessionLog(app_tag)))
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 
