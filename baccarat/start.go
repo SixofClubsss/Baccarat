@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/SixofClubsss/Holdero/holdero"
+	"github.com/blang/semver/v4"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/bundle"
 	"github.com/dReam-dApps/dReams/dwidget"
@@ -24,6 +25,8 @@ import (
 )
 
 const app_tag = "Baccarat"
+
+var version = semver.MustParse("0.3.0-dev")
 
 // Run Baccarat as a single dApp
 func StartApp() {
@@ -143,7 +146,7 @@ func StartApp() {
 		container.NewTabItem(app_tag, LayoutAllItems(&d)),
 		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourcePokerBotIconPng, d.Window)),
 		container.NewTabItem("Swap", holdero.PlaceSwap()),
-		container.NewTabItem("Log", rpc.SessionLog(app_tag)))
+		container.NewTabItem("Log", rpc.SessionLog(app_tag, version)))
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 
