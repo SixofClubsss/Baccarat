@@ -28,6 +28,11 @@ const app_tag = "Baccarat"
 
 var version = semver.MustParse("0.3.0-dev")
 
+// Check baccarat package version
+func Version() semver.Version {
+	return version
+}
+
 // Run Baccarat as a single dApp
 func StartApp() {
 	n := runtime.NumCPU()
