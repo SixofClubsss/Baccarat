@@ -44,7 +44,7 @@ func StartApp() {
 	a := app.NewWithID(fmt.Sprintf("%s Desktop Client", app_tag))
 	a.Settings().SetTheme(bundle.DeroTheme(config.Skin))
 	w := a.NewWindow(app_tag)
-	w.SetIcon(holdero.ResourcePokerBotIconPng)
+	w.SetIcon(holdero.ResourceCardsIconPng)
 	w.Resize(fyne.NewSize(1400, 800))
 	w.SetMaster()
 	done := make(chan struct{})
@@ -149,7 +149,7 @@ func StartApp() {
 	// Layout tabs
 	tabs := container.NewAppTabs(
 		container.NewTabItem(app_tag, LayoutAllItems(&d)),
-		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourcePokerBotIconPng, d.Window)),
+		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourceCardsCirclePng, d.Window)),
 		container.NewTabItem("Swap", holdero.PlaceSwap()),
 		container.NewTabItem("Log", rpc.SessionLog(app_tag, version)))
 
