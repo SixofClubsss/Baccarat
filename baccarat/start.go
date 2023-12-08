@@ -74,7 +74,7 @@ func StartApp() {
 		}
 
 		menu.WriteDreamsConfig(save)
-		menu.CloseAppSignal(true)
+		menu.SetClose(true)
 		gnomon.Stop(app_tag)
 		d.StopProcess()
 		w.Close()

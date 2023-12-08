@@ -51,8 +51,8 @@ github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbi
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/SixofClubsss/Holdero v0.0.0-20231130050832-44c3cf08e835 h1:zFUz8nmpAFjtaxcT+Up4gu9GuLMMmon4wGweLznQlv8=
-github.com/SixofClubsss/Holdero v0.0.0-20231130050832-44c3cf08e835/go.mod h1:kH9DM9nb83wP0X1ElabkWZTrz6QuPizVGPzpda6ulw8=
+github.com/SixofClubsss/Holdero v0.0.0-20231208231927-e992e5eeeb76 h1:J18z4t93wDlY8KWpT8doM6DnnU3kx2jAKSFXocEe10s=
+github.com/SixofClubsss/Holdero v0.0.0-20231208231927-e992e5eeeb76/go.mod h1:olLYcffZ9SA/C+sVyr04NZYPIVe9d5kGoRl/W/6K0+s=
 github.com/VictoriaMetrics/metrics v1.24.0 h1:ILavebReOjYctAGY5QU2F9X0MYvkcrG3aEn2RKa1Zkw=
 github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -88,8 +88,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creachadair/jrpc2 v0.43.0 h1:sgYSOoAWXZ5cx9pd2pYH8dkrjCNdDpFwhO4ucMeUz7U=
 github.com/creachadair/jrpc2 v0.43.0/go.mod h1:oOdNFoMQQpSirGcSujG10NYl05K/IYrIUUNbh+/Xcd8=
-github.com/dReam-dApps/dReams v0.10.2-0.20231127070059-4377d05f3760 h1:dz43txFNuKBmo6ct3oXPG5tmRkaoBaqrUVmJqahE9ik=
-github.com/dReam-dApps/dReams v0.10.2-0.20231127070059-4377d05f3760/go.mod h1:fHUCfJHEIJ4NUNSClxoalz+4nkx3xSU0Z0KzUcuf0FY=
+github.com/dReam-dApps/dReams v0.10.2-0.20231208231055-a8e891da8d6c h1:u2uMzP/9hoCxUTnOEpclylUXhcxiHfkTVY11beWt3yQ=
+github.com/dReam-dApps/dReams v0.10.2-0.20231208231055-a8e891da8d6c/go.mod h1:H0lx4GWwSJQOGMUE23f8ngy/96F3ZjGLqthow9Wc4BM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
