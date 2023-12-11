@@ -53,7 +53,7 @@ func StartApp() {
 	done := make(chan struct{})
 
 	// Initialize dReams AppObject and close func
-	menu.Theme.Img = *canvas.NewImageFromResource(nil)
+	menu.Theme.Img = *canvas.NewImageFromResource(menu.DefaultThemeResource())
 	d := dreams.AppObject{
 		App:        a,
 		Window:     w,
@@ -65,6 +65,7 @@ func StartApp() {
 		save := dreams.SaveData{
 			Skin:   config.Skin,
 			DBtype: gnomon.DBStorageType(),
+			Theme:  menu.Theme.Name,
 		}
 
 		if rpc.Daemon.Rpc == "" {
@@ -92,7 +93,6 @@ func StartApp() {
 	}()
 
 	// Initialize vars
-	rpc.InitBalances()
 
 	// Stand alone process
 	go func() {
@@ -147,7 +147,7 @@ func StartApp() {
 	form = append(form, widget.NewFormItem("", layout.NewSpacer()))
 	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
 	form = append(form, widget.NewFormItem("Avatar", holdero.AvatarSelect(menu.Assets.SCIDs)))
-	form = append(form, widget.NewFormItem("Theme", menu.ThemeSelect()))
+	form = append(form, widget.NewFormItem("Theme", menu.ThemeSelect(&d)))
 	form = append(form, widget.NewFormItem("Card Deck", holdero.FaceSelect(menu.Assets.SCIDs)))
 	form = append(form, widget.NewFormItem("Card Back", holdero.BackSelect(menu.Assets.SCIDs)))
 	form = append(form, widget.NewFormItem("", layout.NewSpacer()))
