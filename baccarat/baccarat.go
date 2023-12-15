@@ -165,6 +165,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	confirmations.SetChecked(true)
 
 	player_button := widget.NewButton("Player", nil)
+	player_button.Importance = widget.HighImportance
 	player_button.OnTapped = func() {
 		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), player_button.Text)
 		if confirmations.Checked {
@@ -179,6 +180,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	}
 
 	banker_button := widget.NewButton("Banker", nil)
+	banker_button.Importance = widget.HighImportance
 	banker_button.OnTapped = func() {
 		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), banker_button.Text)
 		if confirmations.Checked {
@@ -193,6 +195,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	}
 
 	tie_button := widget.NewButton("Tie", nil)
+	tie_button.Importance = widget.HighImportance
 	tie_button.OnTapped = func() {
 		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), tie_button.Text)
 		if confirmations.Checked {
@@ -311,7 +314,7 @@ func stopGif() {
 func GetBaccTables() {
 	if rpc.Daemon.IsConnected() {
 		Tables = make(map[string]string)
-		if table_map, ok := rpc.FindStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Rpc).(string); ok {
+		if table_map, ok := rpc.GetStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Rpc).(string); ok {
 			if str, err := hex.DecodeString(table_map); err == nil {
 				json.Unmarshal([]byte(str), &Tables)
 			}
