@@ -19,7 +19,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -142,10 +141,15 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	entry.PlaceHolder = "dReams:"
 	entry.AllowFloat = false
 	entry.SetText("10")
-	entry.Validator = validation.NewRegexp(`^\d{1,}$`, "Int required")
-	entry.OnChanged = func(s string) {
+	entry.Validator = func(s string) (err error) {
+		if strings.HasPrefix(s, "0") {
+			entry.SetText(strings.TrimLeft(s, "0"))
+			return
+		}
+
 		if rpc.Daemon.IsConnected() {
-			if f, err := strconv.ParseFloat(s, 64); err == nil {
+			var f float64
+			if f, err = strconv.ParseFloat(s, 64); err == nil {
 				if f < bacc.minBet {
 					entry.SetText(bacc.display.tableMin)
 				}
@@ -153,12 +157,13 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 				if f > bacc.maxBet {
 					entry.SetText(bacc.display.tableMax)
 				}
-			}
 
-			if entry.Validate() != nil {
-				entry.SetText(bacc.display.tableMin)
+				return nil
 			}
+			entry.SetText(bacc.display.tableMin)
 		}
+
+		return
 	}
 
 	confirmations := widget.NewCheck("Bet confirmation", nil)
