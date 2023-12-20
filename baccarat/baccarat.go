@@ -13,6 +13,7 @@ import (
 	"github.com/civilware/Gnomon/structures"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/dwidget"
+	"github.com/dReam-dApps/dReams/menu"
 	"github.com/dReam-dApps/dReams/rpc"
 	"github.com/sirupsen/logrus"
 
@@ -120,17 +121,7 @@ func placeBet(amt, where, title string, w fyne.Window) {
 	if tx := BaccBet(amt, where); tx == "ID error" {
 		dialog.NewInformation("Baccarat", "Select a table", w).Show()
 	} else {
-		go func() {
-			info := dialog.NewInformation(title, fmt.Sprintf("TXID: %s", tx), w)
-			info.SetDismissText("Copy")
-			info.SetOnClosed(func() {
-				w.Clipboard().SetContent(tx)
-			})
-			info.Show()
-			time.Sleep(3 * time.Second)
-			info.Hide()
-			info = nil
-		}()
+		go menu.ShowTxDialog(title, "Baccarat", tx, 3*time.Second, w)
 	}
 	bacc.wait = false
 }
@@ -427,14 +418,14 @@ func BaccRefresh(d *dreams.AppObject) {
 		B.Front.Objects[0].Refresh()
 	}
 
-	if !bacc.wait && rpc.Wallet.Height > bacc.cHeight+4 && !bacc.found {
+	if !bacc.wait && rpc.Wallet.Height > bacc.cHeight+4 && !bacc.found && !rpc.IsConfirmingTx() {
 		bacc.display.result = ""
 		ActionBuffer(false)
 		stopGif()
 	}
 
 	if B.Actions.Hidden {
-		if bacc.found && rpc.Wallet.IsConnected() {
+		if bacc.found && rpc.Wallet.IsConnected() && !rpc.IsConfirmingTx() {
 			ActionBuffer(false)
 		}
 	}

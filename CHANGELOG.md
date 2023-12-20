@@ -20,9 +20,10 @@ This file lists the changes to Baccarat repo with each version.
 * Button UI updates
 * Remove swap and import from `holdero`
 * implement `gnomes` and funcs
-* implement `rpc` PrintError and PrintLog
+* implement `rpc` PrintError, PrintLog and IsConfirmingTx
 
 ### Fixed
 
+* Deprecated container.NewMax
 * Fyne error when downloading custom cards
 * Validator hang
