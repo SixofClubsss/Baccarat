@@ -282,11 +282,12 @@ func BaccTable(img fyne.Resource) fyne.CanvasObject {
 	table_img.Resize(fyne.NewSize(1100, 600))
 	table_img.Move(fyne.NewPos(5, 0))
 
+	// TODO fix gif not working
 	var err error
 	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
 	if err != nil {
 		logger.Errorln("[Baccarat] Err loading gif")
-		return container.NewStack()
+		return container.NewWithoutLayout(table_img)
 	}
 	waiting.SetMinSize(fyne.NewSize(100, 100))
 
