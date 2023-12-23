@@ -13,13 +13,13 @@ import (
 	"github.com/civilware/Gnomon/structures"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/dwidget"
+	"github.com/dReam-dApps/dReams/menu"
 	"github.com/dReam-dApps/dReams/rpc"
 	"github.com/sirupsen/logrus"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -121,17 +121,17 @@ func placeBet(amt, where, title string, w fyne.Window) {
 	if tx := BaccBet(amt, where); tx == "ID error" {
 		dialog.NewInformation("Baccarat", "Select a table", w).Show()
 	} else {
-		go func() {
-			info := dialog.NewInformation(title, fmt.Sprintf("TXID: %s", tx), w)
-			info.SetDismissText("Copy")
-			info.SetOnClosed(func() {
-				w.Clipboard().SetContent(tx)
-			})
-			info.Show()
-			time.Sleep(3 * time.Second)
-			info.Hide()
-			info = nil
-		}()
+		if tx == "" {
+			bacc.wait = false
+			bacc.found = true
+			bacc.displayed = true
+			bacc.display.result = ""
+			B.Back.Objects[1].(*canvas.Text).Text = bacc.display.result
+			B.Back.Objects[1].Refresh()
+			waiting.Stop()
+			waiting.Hide()
+		}
+		go menu.ShowTxDialog(title, "Baccarat", tx, 3*time.Second, w)
 	}
 	bacc.wait = false
 }
@@ -142,10 +142,15 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	entry.PlaceHolder = "dReams:"
 	entry.AllowFloat = false
 	entry.SetText("10")
-	entry.Validator = validation.NewRegexp(`^\d{1,}$`, "Int required")
-	entry.OnChanged = func(s string) {
+	entry.Validator = func(s string) (err error) {
+		if strings.HasPrefix(s, "0") {
+			entry.SetText(strings.TrimLeft(s, "0"))
+			return
+		}
+
 		if rpc.Daemon.IsConnected() {
-			if f, err := strconv.ParseFloat(s, 64); err == nil {
+			var f float64
+			if f, err = strconv.ParseFloat(s, 64); err == nil {
 				if f < bacc.minBet {
 					entry.SetText(bacc.display.tableMin)
 				}
@@ -153,18 +158,20 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 				if f > bacc.maxBet {
 					entry.SetText(bacc.display.tableMax)
 				}
-			}
 
-			if entry.Validate() != nil {
-				entry.SetText(bacc.display.tableMin)
+				return nil
 			}
+			entry.SetText(bacc.display.tableMin)
 		}
+
+		return
 	}
 
 	confirmations := widget.NewCheck("Bet confirmation", nil)
 	confirmations.SetChecked(true)
 
 	player_button := widget.NewButton("Player", nil)
+	player_button.Importance = widget.HighImportance
 	player_button.OnTapped = func() {
 		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), player_button.Text)
 		if confirmations.Checked {
@@ -179,6 +186,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	}
 
 	banker_button := widget.NewButton("Banker", nil)
+	banker_button.Importance = widget.HighImportance
 	banker_button.OnTapped = func() {
 		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), banker_button.Text)
 		if confirmations.Checked {
@@ -193,6 +201,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	}
 
 	tie_button := widget.NewButton("Tie", nil)
+	tie_button.Importance = widget.HighImportance
 	tie_button.OnTapped = func() {
 		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), tie_button.Text)
 		if confirmations.Checked {
@@ -277,25 +286,13 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	return &B.Actions
 }
 
-// Baccarat table image and waiting gif
+// Baccarat table image
 func BaccTable(img fyne.Resource) fyne.CanvasObject {
 	table_img := canvas.NewImageFromResource(img)
 	table_img.Resize(fyne.NewSize(1100, 600))
 	table_img.Move(fyne.NewPos(5, 0))
 
-	var err error
-	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
-	if err != nil {
-		logger.Errorln("[Baccarat] Err loading gif")
-		return container.NewMax()
-	}
-	waiting.SetMinSize(fyne.NewSize(100, 100))
-
-	waiting_cont := container.NewMax(waiting)
-	waiting_cont.Move(fyne.NewPos(506, 137))
-	waiting.Hide()
-
-	return container.NewWithoutLayout(table_img, waiting_cont)
+	return container.NewWithoutLayout(table_img)
 }
 
 // Stop and hide the waiting gif
@@ -311,7 +308,7 @@ func stopGif() {
 func GetBaccTables() {
 	if rpc.Daemon.IsConnected() {
 		Tables = make(map[string]string)
-		if table_map, ok := rpc.FindStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Rpc).(string); ok {
+		if table_map, ok := rpc.GetStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Rpc).(string); ok {
 			if str, err := hex.DecodeString(table_map); err == nil {
 				json.Unmarshal([]byte(str), &Tables)
 			}
@@ -419,14 +416,14 @@ func BaccRefresh(d *dreams.AppObject) {
 		B.Front.Objects[0].Refresh()
 	}
 
-	if !bacc.wait && rpc.Wallet.Height > bacc.cHeight+4 && !bacc.found {
+	if !bacc.wait && rpc.Wallet.Height > bacc.cHeight+4 && !bacc.found && !rpc.IsConfirmingTx() {
 		bacc.display.result = ""
 		ActionBuffer(false)
 		stopGif()
 	}
 
 	if B.Actions.Hidden {
-		if bacc.found && rpc.Wallet.IsConnected() {
+		if bacc.found && rpc.Wallet.IsConnected() && !rpc.IsConfirmingTx() {
 			ActionBuffer(false)
 		}
 	}

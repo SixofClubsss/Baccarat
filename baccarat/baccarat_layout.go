@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	xwidget "fyne.io/x/fyne/widget"
 )
 
 var B dreams.ContainerStack
@@ -27,20 +28,33 @@ func LayoutAllItems(d *dreams.AppObject) *fyne.Container {
 	results.Move(fyne.NewPos(564, 237))
 	results.Alignment = fyne.TextAlignCenter
 
+	// Waiting for block gif
+	waiting_cont := container.NewVBox()
+
+	var err error
+	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
+	if err != nil {
+		logger.Errorln("[Baccarat] Err loading gif")
+	} else {
+		waiting.SetMinSize(fyne.NewSize(100, 100))
+		waiting.Hide()
+		waiting_cont = container.NewVBox(dwidget.NewSpacer(0, 177), container.NewHBox(dwidget.NewSpacer(500, 0), waiting))
+	}
+
 	B.Back = *container.NewWithoutLayout(
 		BaccTable(resourceBaccTablePng),
 		results)
 
 	B.Front = *clearBaccCards()
 
-	bacc_label := container.NewHBox(B.LeftLabel, layout.NewSpacer(), B.RightLabel)
-
-	B.DApp = container.NewVBox(
-		dwidget.LabelColor(bacc_label),
-		&B.Back,
-		&B.Front,
-		layout.NewSpacer(),
-		baccaratButtons(d.Window))
+	B.DApp = container.NewStack(
+		container.NewVBox(
+			dwidget.LabelColor(container.NewHBox(B.LeftLabel, layout.NewSpacer(), B.RightLabel)),
+			&B.Back,
+			&B.Front,
+			layout.NewSpacer(),
+			baccaratButtons(d.Window)),
+		waiting_cont)
 
 	// Main process
 	go fetch(d)

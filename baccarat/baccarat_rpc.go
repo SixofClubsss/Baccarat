@@ -169,7 +169,7 @@ func FetchBaccHand(tx string) {
 //   - w defines where bet is placed (player, banker or tie)
 func BaccBet(amt, w string) (tx string) {
 	if bacc.assetID == "" || len(bacc.assetID) != 64 {
-		logger.Errorln("[Baccarat] Asset ID error")
+		rpc.PrintError("[Baccarat] Asset ID error")
 		return "ID error"
 	}
 
@@ -199,21 +199,18 @@ func BaccBet(amt, w string) (tx string) {
 	}
 
 	if err := rpcClientW.CallFor(ctx, &txid, "transfer", params); err != nil {
-		logger.Errorln("[BaccBet]", err)
+		rpc.PrintError("[Baccarat] Bet: %s", err)
 		return
 	}
 
 	bacc.last = txid.TXID
 	bacc.notified = false
 	if w == "player" {
-		logger.Println("[Baccarat] Player TX:", txid)
-		rpc.AddLog("Baccarat Player TX: " + txid.TXID)
+		rpc.PrintLog("[Baccarat] Player TX: %s", txid)
 	} else if w == "banker" {
-		logger.Println("[Baccarat] Banker TX:", txid)
-		rpc.AddLog("Baccarat Banker TX: " + txid.TXID)
+		rpc.PrintLog("[Baccarat] Banker TX: %s", txid)
 	} else {
-		logger.Println("[Baccarat] Tie TX:", txid)
-		rpc.AddLog("Baccarat Tie TX: " + txid.TXID)
+		rpc.PrintLog("[Baccarat] Tie TX: %s", txid)
 	}
 
 	bacc.cHeight = rpc.Wallet.Height

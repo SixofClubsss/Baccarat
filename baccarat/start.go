@@ -2,6 +2,7 @@ package baccarat
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 	"os/signal"
 	"runtime"
@@ -15,9 +16,11 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/SixofClubsss/Holdero/holdero"
+	"github.com/blang/semver/v4"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/bundle"
 	"github.com/dReam-dApps/dReams/dwidget"
+	"github.com/dReam-dApps/dReams/gnomes"
 	"github.com/dReam-dApps/dReams/menu"
 	"github.com/dReam-dApps/dReams/rpc"
 	"github.com/sirupsen/logrus"
@@ -25,35 +28,44 @@ import (
 
 const app_tag = "Baccarat"
 
+var version = semver.MustParse("0.3.0")
+var gnomon = gnomes.NewGnomes()
+
+// Check baccarat package version
+func Version() semver.Version {
+	return version
+}
+
 // Run Baccarat as a single dApp
 func StartApp() {
 	n := runtime.NumCPU()
 	runtime.GOMAXPROCS(n)
-	menu.InitLogrusLog(logrus.InfoLevel)
+	gnomes.InitLogrusLog(logrus.InfoLevel)
 	config := menu.ReadDreamsConfig(app_tag)
 
 	// Initialize Fyne app and window
 	a := app.NewWithID(fmt.Sprintf("%s Desktop Client", app_tag))
 	a.Settings().SetTheme(bundle.DeroTheme(config.Skin))
 	w := a.NewWindow(app_tag)
-	w.SetIcon(holdero.ResourcePokerBotIconPng)
+	w.SetIcon(holdero.ResourceCardsIconPng)
 	w.Resize(fyne.NewSize(1400, 800))
 	w.SetMaster()
 	done := make(chan struct{})
 
 	// Initialize dReams AppObject and close func
-	dreams.Theme.Img = *canvas.NewImageFromResource(nil)
+	menu.Theme.Img = *canvas.NewImageFromResource(menu.DefaultThemeResource())
 	d := dreams.AppObject{
 		App:        a,
 		Window:     w,
-		Background: container.NewMax(&dreams.Theme.Img),
+		Background: container.NewStack(&menu.Theme.Img),
 	}
 	d.SetChannels(1)
 
 	closeFunc := func() {
 		save := dreams.SaveData{
 			Skin:   config.Skin,
-			DBtype: menu.Gnomes.DBType,
+			DBtype: gnomon.DBStorageType(),
+			Theme:  menu.Theme.Name,
 		}
 
 		if rpc.Daemon.Rpc == "" {
@@ -63,8 +75,8 @@ func StartApp() {
 		}
 
 		menu.WriteDreamsConfig(save)
-		menu.CloseAppSignal(true)
-		menu.Gnomes.Stop(app_tag)
+		menu.SetClose(true)
+		gnomon.Stop(app_tag)
 		d.StopProcess()
 		w.Close()
 	}
@@ -81,11 +93,9 @@ func StartApp() {
 	}()
 
 	// Initialize vars
-	rpc.InitBalances()
 
 	// Stand alone process
 	go func() {
-		logger.Printf("[%s] %s %s %s", app_tag, rpc.DREAMSv, runtime.GOOS, runtime.GOARCH)
 		time.Sleep(3 * time.Second)
 		ticker := time.NewTicker(3 * time.Second)
 		for {
@@ -130,27 +140,36 @@ func StartApp() {
 	connect_box.AddDaemonOptions(config.Daemon)
 	connect_box.Container.Objects[0].(*fyne.Container).Add(menu.StartIndicators())
 
-	// Initialize asset widgets
-	asset_selects := []fyne.Widget{
-		menu.NameEntry().(*fyne.Container).Objects[1].(*widget.Select),
-		holdero.FaceSelect(),
-		holdero.BackSelect(),
-		dreams.ThemeSelect(),
-		holdero.AvatarSelect(menu.Assets.Asset_map),
-	}
+	// Initialize profile widgets
+	line := canvas.NewLine(bundle.TextColor)
+	form := []*widget.FormItem{}
+	form = append(form, widget.NewFormItem("Name", menu.NameEntry()))
+	form = append(form, widget.NewFormItem("", layout.NewSpacer()))
+	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
+	form = append(form, widget.NewFormItem("Avatar", holdero.AvatarSelect(menu.Assets.SCIDs)))
+	form = append(form, widget.NewFormItem("Theme", menu.ThemeSelect(&d)))
+	form = append(form, widget.NewFormItem("Card Deck", holdero.FaceSelect(menu.Assets.SCIDs)))
+	form = append(form, widget.NewFormItem("Card Back", holdero.BackSelect(menu.Assets.SCIDs)))
+	form = append(form, widget.NewFormItem("", layout.NewSpacer()))
+	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
+
+	profile_spacer := canvas.NewRectangle(color.Transparent)
+	profile_spacer.SetMinSize(fyne.NewSize(450, 0))
+
+	profile := container.NewCenter(container.NewBorder(profile_spacer, nil, nil, nil, widget.NewForm(form...)))
 
 	// Layout tabs
 	tabs := container.NewAppTabs(
 		container.NewTabItem(app_tag, LayoutAllItems(&d)),
-		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, asset_selects, holdero.ResourcePokerBotIconPng, d.Window)),
-		container.NewTabItem("Swap", PlaceSwap()),
-		container.NewTabItem("Log", rpc.SessionLog()))
+		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, profile, nil, holdero.ResourceCardsCirclePng, &d)),
+		container.NewTabItem("Swap", holdero.PlaceSwap(&d)),
+		container.NewTabItem("Log", rpc.SessionLog(app_tag, version)))
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 
 	go func() {
 		time.Sleep(450 * time.Millisecond)
-		w.SetContent(container.NewMax(d.Background, container.NewMax(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connect_box.Container)))
+		w.SetContent(container.NewStack(d.Background, container.NewStack(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connect_box.Container)))
 	}()
 
 	w.ShowAndRun()
