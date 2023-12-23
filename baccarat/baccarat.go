@@ -121,6 +121,16 @@ func placeBet(amt, where, title string, w fyne.Window) {
 	if tx := BaccBet(amt, where); tx == "ID error" {
 		dialog.NewInformation("Baccarat", "Select a table", w).Show()
 	} else {
+		if tx == "" {
+			bacc.wait = false
+			bacc.found = true
+			bacc.displayed = true
+			bacc.display.result = ""
+			B.Back.Objects[1].(*canvas.Text).Text = bacc.display.result
+			B.Back.Objects[1].Refresh()
+			waiting.Stop()
+			waiting.Hide()
+		}
 		go menu.ShowTxDialog(title, "Baccarat", tx, 3*time.Second, w)
 	}
 	bacc.wait = false
