@@ -276,26 +276,13 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	return &B.Actions
 }
 
-// Baccarat table image and waiting gif
+// Baccarat table image
 func BaccTable(img fyne.Resource) fyne.CanvasObject {
 	table_img := canvas.NewImageFromResource(img)
 	table_img.Resize(fyne.NewSize(1100, 600))
 	table_img.Move(fyne.NewPos(5, 0))
 
-	// TODO fix gif not working
-	var err error
-	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
-	if err != nil {
-		logger.Errorln("[Baccarat] Err loading gif")
-		return container.NewWithoutLayout(table_img)
-	}
-	waiting.SetMinSize(fyne.NewSize(100, 100))
-
-	waiting_cont := container.NewStack(waiting)
-	waiting_cont.Move(fyne.NewPos(506, 137))
-	waiting.Hide()
-
-	return container.NewWithoutLayout(table_img, waiting_cont)
+	return container.NewWithoutLayout(table_img)
 }
 
 // Stop and hide the waiting gif
