@@ -2,7 +2,7 @@
 
 This file lists the changes to Baccarat repo with each version.
 
-## 0.3.0 - In Progress
+## 0.3.0 - December 23 2023
 
 ### Added
 
