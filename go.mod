@@ -1,14 +1,14 @@
 module github.com/SixofClubsss/Baccarat
 
-go 1.20
+go 1.21.5
 
 require (
 	fyne.io/fyne/v2 v2.4.4-0.20231224124904-a09bbd790b98
 	fyne.io/x/fyne v0.0.0-20230411205836-1ca0ead20763
-	github.com/SixofClubsss/Holdero v0.3.1-0.20240103073854-2fbe0c751b18
+	github.com/SixofClubsss/Holdero v0.3.1-0.20240116060705-26bde051f69d
 	github.com/blang/semver/v4 v4.0.0
 	github.com/civilware/Gnomon v0.0.0-20240102201536-a5900d5a61da
-	github.com/dReam-dApps/dReams v0.11.1-0.20240103072854-974a28cc7e46
+	github.com/dReam-dApps/dReams v0.11.1-0.20240116005155-bde879f584a9
 	github.com/deroproject/derohe v0.0.0-20230604143809-765b2db1f482
 	github.com/sirupsen/logrus v1.9.3
 )
