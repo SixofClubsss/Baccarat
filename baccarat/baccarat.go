@@ -173,7 +173,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	player_button := widget.NewButton("Player", nil)
 	player_button.Importance = widget.HighImportance
 	player_button.OnTapped = func() {
-		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), player_button.Text)
+		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), player_button.Text)
 		if confirmations.Checked {
 			dialog.NewConfirm("Confirm", title, func(b bool) {
 				if b {
@@ -188,7 +188,7 @@ func baccaratButtons(w fyne.Window) fyne.CanvasObject {
 	banker_button := widget.NewButton("Banker", nil)
 	banker_button.Importance = widget.HighImportance
 	banker_button.OnTapped = func() {
-		title := fmt.Sprintf("%s %s %s bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), banker_button.Text)
+		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), banker_button.Text)
 		if confirmations.Checked {
 			dialog.NewConfirm("Confirm", title, func(b bool) {
 				if b {
