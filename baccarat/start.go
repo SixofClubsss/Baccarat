@@ -28,7 +28,7 @@ import (
 
 const app_tag = "Baccarat"
 
-var version = semver.MustParse("0.3.0-dev.2")
+var version = semver.MustParse("0.3.0-dev.3")
 var gnomon = gnomes.NewGnomes()
 
 // Check baccarat package version
