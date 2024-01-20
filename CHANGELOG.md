@@ -2,6 +2,15 @@
 
 This file lists the changes to Baccarat repo with each version.
 
+## 0.3.1 - January 19 2024
+
+### Changed
+* Go 1.21.5
+* Fyne 2.4.3
+* dReams 0.11.1
+* Cleaned up `rpc` client var names
+
+
 ## 0.3.0 - December 23 2023
 
 ### Added
