@@ -30,6 +30,7 @@ Please select the right one.
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code
 - [ ] My changes generate no new warnings
+- [ ] I have updated the semver version (baccarat.version)
 
 ## License
 
