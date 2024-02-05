@@ -173,9 +173,6 @@ func BaccBet(amt, w string) (tx string) {
 		return "ID error"
 	}
 
-	client, ctx, cancel := rpc.SetWalletClient(rpc.Wallet.Rpc, rpc.Wallet.UserPass)
-	defer cancel()
-
 	arg1 := dero.Argument{Name: "entrypoint", DataType: "S", Value: "PlayBaccarat"}
 	arg2 := dero.Argument{Name: "betOn", DataType: "S", Value: w}
 	args := dero.Arguments{arg1, arg2}
@@ -198,7 +195,7 @@ func BaccBet(amt, w string) (tx string) {
 		Fees:      fee,
 	}
 
-	if err := client.CallFor(ctx, &txid, "transfer", params); err != nil {
+	if err := rpc.Wallet.CallFor(&txid, "transfer", params); err != nil {
 		rpc.PrintError("[Baccarat] Bet: %s", err)
 		return
 	}
