@@ -2,6 +2,19 @@
 
 This file lists the changes to Baccarat repo with each version.
 
+## 0.x.x - In Progress
+
+### Added 
+* Hand log
+* FetchLastHand(), show last hand when connected
+
+
+### Changed
+* Rename FetchBaccHand() to FetchHand
+* Handle Action Show/Hide in OnTapped 
+* Clean up unused vars
+
+
 ## 0.3.1 - January 19 2024
 
 ### Changed

@@ -17,6 +17,8 @@ import (
 
 var B dreams.ContainerStack
 
+var logHand = widget.NewMultiLineEntry()
+
 // Baccarat tab layout
 func LayoutAllItems(d *dreams.AppObject) *fyne.Container {
 	B.LeftLabel = widget.NewLabel("")
@@ -25,7 +27,7 @@ func LayoutAllItems(d *dreams.AppObject) *fyne.Container {
 	B.RightLabel.SetText("dReams Balance: " + rpc.DisplayBalance("dReams") + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
 
 	results := canvas.NewText("", color.White)
-	results.Move(fyne.NewPos(564, 237))
+	results.Move(fyne.NewPos(564, 287))
 	results.Alignment = fyne.TextAlignCenter
 
 	// Waiting for block gif
@@ -47,13 +49,18 @@ func LayoutAllItems(d *dreams.AppObject) *fyne.Container {
 
 	B.Front = *clearBaccCards()
 
+	logHand.Disable()
+
 	B.DApp = container.NewStack(
 		container.NewVBox(
-			dwidget.LabelColor(container.NewHBox(B.LeftLabel, layout.NewSpacer(), B.RightLabel)),
-			&B.Back,
-			&B.Front,
+			dwidget.LabelColor(container.NewHBox(B.LeftLabel, layout.NewSpacer(), B.RightLabel))),
+		&B.Back,
+		&B.Front,
+		container.NewAdaptiveGrid(3,
 			layout.NewSpacer(),
-			baccaratButtons(d.Window)),
+			layout.NewSpacer(),
+			container.NewHBox(layout.NewSpacer(), container.NewStack(container.NewBorder(dwidget.NewSpacer(250, 30), nil, nil, nil, logHand)))),
+		baccaratButtons(d),
 		waiting_cont)
 
 	// Main process
