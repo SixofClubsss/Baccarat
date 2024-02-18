@@ -16,19 +16,17 @@ type cards struct {
 }
 
 type baccValues struct {
-	player    cards
-	banker    cards
-	cHeight   int
-	minBet    float64
-	maxBet    float64
-	assetID   string
-	contract  string
-	last      string
-	found     bool
-	displayed bool
-	notified  bool
-	wait      bool
-	display   struct {
+	player   cards
+	banker   cards
+	cHeight  int
+	minBet   float64
+	maxBet   float64
+	assetID  string
+	contract string
+	last     int
+	found    bool
+	wait     bool
+	display  struct {
 		tableMax string
 		tableMin string
 		result   string
@@ -45,7 +43,7 @@ var bacc baccValues
 
 // Get Baccarat SC data
 func fetchBaccSC() {
-	if rpc.Daemon.IsConnected() {
+	if rpc.Daemon.IsConnected() && rpc.Wallet.Height > bacc.last {
 		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
 		defer cancel()
 
@@ -68,8 +66,8 @@ func fetchBaccSC() {
 		Min_jv := result.VariableStringKeys["Min Bet:"]
 		Max_jv := result.VariableStringKeys["Max Bet:"]
 		Ties_jv := result.VariableStringKeys["Ties:"]
-		// Pot_jv = result.Balances[dReamsSCID]
-		// Pot_jv = result.Balances["0000000000000000000000000000000000000000000000000000000000000000"]
+		// dReams_jv := result.Balances[rpc.DreamsSCID]
+		// Dero_jv := result.Balances[crypto.ZEROHASH.String()]
 		if Asset_jv != nil {
 			bacc.assetID = fmt.Sprint(Asset_jv)
 		}
@@ -105,11 +103,46 @@ func fetchBaccSC() {
 			bacc.display.tableMin = "10"
 			bacc.minBet = 10
 		}
+
+		// Update TX hand log
+		bacc.last = rpc.Wallet.Height
+
+		display, ok := result.VariableStringKeys["display"].(float64)
+		if !ok {
+			display = 33
+		}
+
+		total := rpc.IntType(Total_jv)
+		disp := int(display)
+		if total < disp {
+			disp = total
+		}
+
+		var results string
+		for i := total; i > total-disp; i-- {
+			w := strconv.Itoa(i)
+			if _, ok := result.VariableStringKeys[w+"-Hand#TXID:"].(string); ok {
+				PTotal_jv := result.VariableStringKeys[w+"-Player total:"]
+				BTotal_jv := result.VariableStringKeys[w+"-Banker total:"]
+
+				p := rpc.IntType(PTotal_jv)
+				b := rpc.IntType(BTotal_jv)
+				if p == b {
+					results = results + fmt.Sprintf("#%s [Tie], %d & %d\n", w, p, b)
+				} else if p > b {
+					results = results + fmt.Sprintf("#%s [Player Wins], %d over %d\n", w, p, b)
+				} else {
+					results = results + fmt.Sprintf("#%s [Banker Wins], %d over %d\n", w, b, p)
+				}
+			}
+		}
+
+		logHand.SetText(results)
 	}
 }
 
-// Find played Baccarat hand
-func FetchBaccHand(tx string) {
+// Get Baccarat hand by TXID
+func FetchHand(tx string) {
 	if rpc.Daemon.IsConnected() && tx != "" {
 		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
 		defer cancel()
@@ -122,7 +155,7 @@ func FetchBaccHand(tx string) {
 		}
 
 		if err := client.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
-			logger.Errorln("[FetchBaccHand]", err)
+			logger.Errorln("[FetchHand]", err)
 			return
 		}
 
@@ -130,8 +163,8 @@ func FetchBaccHand(tx string) {
 		if Total_jv != nil {
 			Display_jv := result.VariableStringKeys["display"]
 			start := rpc.IntType(Total_jv) - rpc.IntType(Display_jv)
-			i := start
-			for i < start+45 {
+
+			for i := start; i < start+45; i++ {
 				h := "-Hand#TXID:"
 				w := strconv.Itoa(i)
 
@@ -144,24 +177,71 @@ func FetchBaccHand(tx string) {
 						bacc.banker.card1 = rpc.IntType(result.VariableStringKeys[w+"-Banker x:"])
 						bacc.banker.card2 = rpc.IntType(result.VariableStringKeys[w+"-Banker y:"])
 						bacc.banker.card3 = rpc.IntType(result.VariableStringKeys[w+"-Banker z:"])
-						PTotal_jv := result.VariableStringKeys[w+"-Player total:"]
-						BTotal_jv := result.VariableStringKeys[w+"-Banker total:"]
 
-						p := rpc.IntType(PTotal_jv)
-						b := rpc.IntType(BTotal_jv)
-						if rpc.IntType(PTotal_jv) == rpc.IntType(BTotal_jv) {
+						p := rpc.IntType(result.VariableStringKeys[w+"-Player total:"])
+						b := rpc.IntType(result.VariableStringKeys[w+"-Banker total:"])
+
+						if p == b {
 							bacc.display.result = fmt.Sprintf("Hand# %s Tie, %d & %d", w, p, b)
-						} else if rpc.IntType(PTotal_jv) > rpc.IntType(BTotal_jv) {
+						} else if p > b {
 							bacc.display.result = fmt.Sprintf("Hand# %s Player Wins, %d over %d", w, p, b)
 						} else {
 							bacc.display.result = fmt.Sprintf("Hand# %s Banker Wins, %d over %d", w, b, p)
 						}
+
+						return
 					}
 				}
-				i++
 			}
 		}
 	}
+}
+
+// Get last hand played
+func FetchLastHand() (found bool) {
+	if rpc.Daemon.IsConnected() {
+		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
+		defer cancel()
+
+		var result *dero.GetSC_Result
+		params := dero.GetSC_Params{
+			SCID:      bacc.contract,
+			Code:      false,
+			Variables: true,
+		}
+
+		if err := client.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
+			logger.Errorln("[FetchLastHand]", err)
+			return
+		}
+
+		Total_jv := result.VariableStringKeys["TotalHandsPlayed:"]
+		if rpc.IntType(Total_jv) > 0 {
+			total := fmt.Sprintf("%d", rpc.IntType(Total_jv))
+			if _, ok := result.VariableStringKeys[total+"-Hand#TXID:"].(string); ok {
+				found = true
+				bacc.player.card1 = rpc.IntType(result.VariableStringKeys[total+"-Player x:"])
+				bacc.player.card2 = rpc.IntType(result.VariableStringKeys[total+"-Player y:"])
+				bacc.player.card3 = rpc.IntType(result.VariableStringKeys[total+"-Player z:"])
+				bacc.banker.card1 = rpc.IntType(result.VariableStringKeys[total+"-Banker x:"])
+				bacc.banker.card2 = rpc.IntType(result.VariableStringKeys[total+"-Banker y:"])
+				bacc.banker.card3 = rpc.IntType(result.VariableStringKeys[total+"-Banker z:"])
+
+				p := rpc.IntType(result.VariableStringKeys[total+"-Player total:"])
+				b := rpc.IntType(result.VariableStringKeys[total+"-Banker total:"])
+
+				if p == b {
+					bacc.display.result = fmt.Sprintf("Hand# %s Tie, %d & %d", total, p, b)
+				} else if p > b {
+					bacc.display.result = fmt.Sprintf("Hand# %s Player Wins, %d over %d", total, p, b)
+				} else {
+					bacc.display.result = fmt.Sprintf("Hand# %s Banker Wins, %d over %d", total, b, p)
+				}
+			}
+		}
+	}
+
+	return
 }
 
 // Place Baccarat bet
@@ -200,8 +280,6 @@ func BaccBet(amt, w string) (tx string) {
 		return
 	}
 
-	bacc.last = txid.TXID
-	bacc.notified = false
 	if w == "player" {
 		rpc.PrintLog("[Baccarat] Player TX: %s", txid)
 	} else if w == "banker" {
