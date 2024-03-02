@@ -149,7 +149,7 @@ func placeBet(amt, where, title string, d *dreams.AppObject) {
 
 // Baccarat action objects
 func baccaratButtons(d *dreams.AppObject) fyne.CanvasObject {
-	entry := dwidget.NewDeroEntry("", 1, 0)
+	entry := dwidget.NewAmountEntry("", 1, 0)
 	entry.PlaceHolder = "dReams:"
 	entry.AllowFloat = false
 	entry.SetText("10")
@@ -186,7 +186,15 @@ func baccaratButtons(d *dreams.AppObject) fyne.CanvasObject {
 	btnBet := widget.NewButton("Bet", nil)
 	btnBet.Importance = widget.HighImportance
 	btnBet.OnTapped = func() {
-		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetSCIDName(bacc.assetID), btnBet.Text)
+		if bet.SelectedIndex() < 0 {
+			info := dialog.NewInformation("Select Bet", "Select where to place your bet", d.Window)
+			info.SetOnClosed(bet.FocusLost)
+			bet.FocusGained()
+			info.Show()
+			return
+		}
+
+		title := fmt.Sprintf("%s %s %s Bet", entry.Text, rpc.GetAssetNameBySCID(bacc.assetID), btnBet.Text)
 		if confirmations.Checked {
 			dialog.NewConfirm("Confirm", title, func(b bool) {
 				if b {
@@ -388,9 +396,9 @@ func clearBaccCards() *fyne.Container {
 
 // Refresh all Baccarat objects
 func BaccRefresh(d *dreams.AppObject) {
-	asset_name := rpc.GetAssetSCIDName(bacc.assetID)
-	B.LeftLabel.SetText("Total Hands Played: " + bacc.display.stats.total + "      Player Wins: " + bacc.display.stats.player + "      Ties: " + bacc.display.stats.ties + "      Banker Wins: " + bacc.display.stats.banker + "      Min Bet is " + bacc.display.tableMin + " " + asset_name + ", Max Bet is " + bacc.display.tableMax)
-	B.RightLabel.SetText(asset_name + " Balance: " + rpc.DisplayBalance(asset_name) + "      Dero Balance: " + rpc.DisplayBalance("Dero") + "      Height: " + rpc.Wallet.Display.Height)
+	asset_name := rpc.GetAssetNameBySCID(bacc.assetID)
+	B.Left.Label.SetText("Total Hands Played: " + bacc.display.stats.total + "      Player Wins: " + bacc.display.stats.player + "      Ties: " + bacc.display.stats.ties + "      Banker Wins: " + bacc.display.stats.banker + "      Min Bet is " + bacc.display.tableMin + " " + asset_name + ", Max Bet is " + bacc.display.tableMax)
+	B.Right.Label.SetText(asset_name + " Balance: " + rpc.Wallet.BalanceF(asset_name) + "      DERO Balance: " + rpc.Wallet.BalanceF("DERO") + "      Height: " + fmt.Sprintf("%d", rpc.Wallet.Height()))
 
 	if B.Actions.Hidden {
 		if bacc.found && rpc.Wallet.IsConnected() && !rpc.IsConfirmingTx() {

@@ -18,12 +18,12 @@ type cards struct {
 type baccValues struct {
 	player   cards
 	banker   cards
-	cHeight  int
+	cHeight  uint64
 	minBet   float64
 	maxBet   float64
 	assetID  string
 	contract string
-	last     int
+	last     uint64
 	found    bool
 	wait     bool
 	display  struct {
@@ -43,7 +43,7 @@ var bacc baccValues
 
 // Get Baccarat SC data
 func fetchBaccSC() {
-	if rpc.Daemon.IsConnected() && rpc.Wallet.Height > bacc.last {
+	if rpc.Daemon.IsConnected() && rpc.Wallet.Height() > bacc.last {
 		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
 		defer cancel()
 
@@ -105,7 +105,7 @@ func fetchBaccSC() {
 		}
 
 		// Update TX hand log
-		bacc.last = rpc.Wallet.Height
+		bacc.last = rpc.Wallet.Height()
 
 		display, ok := result.VariableStringKeys["display"].(float64)
 		if !ok {
@@ -128,11 +128,11 @@ func fetchBaccSC() {
 				p := rpc.IntType(PTotal_jv)
 				b := rpc.IntType(BTotal_jv)
 				if p == b {
-					results = results + fmt.Sprintf("#%s [Tie], %d & %d\n", w, p, b)
+					results = results + fmt.Sprintf("#%s - [Tie], %d & %d\n", w, p, b)
 				} else if p > b {
-					results = results + fmt.Sprintf("#%s [Player Wins], %d over %d\n", w, p, b)
+					results = results + fmt.Sprintf("#%s - [Player], %d over %d\n", w, p, b)
 				} else {
-					results = results + fmt.Sprintf("#%s [Banker Wins], %d over %d\n", w, b, p)
+					results = results + fmt.Sprintf("#%s - [Banker], %d over %d\n", w, b, p)
 				}
 			}
 		}
@@ -253,10 +253,9 @@ func BaccBet(amt, w string) (tx string) {
 		return "ID error"
 	}
 
-	arg1 := dero.Argument{Name: "entrypoint", DataType: "S", Value: "PlayBaccarat"}
-	arg2 := dero.Argument{Name: "betOn", DataType: "S", Value: w}
-	args := dero.Arguments{arg1, arg2}
-	txid := dero.Transfer_Result{}
+	args := dero.Arguments{
+		dero.Argument{Name: "entrypoint", DataType: "S", Value: "PlayBaccarat"},
+		dero.Argument{Name: "betOn", DataType: "S", Value: w}}
 
 	t1 := dero.Transfer{
 		SCID:        crypto.HashHexToHash(bacc.assetID),
@@ -266,6 +265,7 @@ func BaccBet(amt, w string) (tx string) {
 	}
 
 	t := []dero.Transfer{t1}
+	txid := dero.Transfer_Result{}
 	fee := rpc.GasEstimate(bacc.contract, "[Baccarat]", args, t, rpc.LowLimitFee)
 	params := &dero.Transfer_Params{
 		Transfers: t,
@@ -288,7 +288,7 @@ func BaccBet(amt, w string) (tx string) {
 		rpc.PrintLog("[Baccarat] Tie TX: %s", txid)
 	}
 
-	bacc.cHeight = rpc.Wallet.Height
+	bacc.cHeight = rpc.Wallet.Height()
 
 	return txid.TXID
 }
