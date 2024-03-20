@@ -51,10 +51,11 @@ func StartApp() {
 	d := dreams.NewFyneApp(
 		appID,
 		appName,
+		"On-chain Baccarat",
 		bundle.DeroTheme(config.Skin),
 		holdero.ResourceCardsIconPng,
 		menu.DefaultBackgroundResource(),
-		rpc.NewXSWDApplicationData(appName, "On-chain Baccarat", appID, true))
+		true)
 
 	// Set one channel for Baccarat routine
 	d.SetChannels(1)
@@ -142,7 +143,7 @@ func StartApp() {
 	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
 	form = append(form, widget.NewFormItem("Avatar", holdero.AvatarSelect(menu.Assets.SCIDs)))
 	form = append(form, widget.NewFormItem("Theme", menu.ThemeSelect(&d)))
-	form = append(form, widget.NewFormItem("Card Deck", holdero.FaceSelect(menu.Assets.SCIDs)))
+	form = append(form, widget.NewFormItem("Card Deck", holdero.FaceSelect(menu.Assets.SCIDs, &d)))
 	form = append(form, widget.NewFormItem("Card Back", holdero.BackSelect(menu.Assets.SCIDs)))
 	form = append(form, widget.NewFormItem("", layout.NewSpacer()))
 	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
