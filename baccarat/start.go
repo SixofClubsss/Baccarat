@@ -108,7 +108,7 @@ func StartApp() {
 
 				if rpc.Wallet.IsConnected() {
 					menu.Assets.Swap.Show()
-					menu.Assets.Balances.Refresh()
+					menu.Assets.Balances.List.Refresh()
 				} else {
 					menu.Assets.Swap.Hide()
 				}

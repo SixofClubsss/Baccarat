@@ -51,8 +51,8 @@ github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbi
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/SixofClubsss/Holdero v0.3.2-0.20240320082046-9f82637810f8 h1:DoEkuExbru+in23YYf6aUxjKe0efcIIXrKuXL2HezkI=
-github.com/SixofClubsss/Holdero v0.3.2-0.20240320082046-9f82637810f8/go.mod h1:mRhyfM8ZZ4jHtTRLjr9v+5ZQV3JlIMwpF8uql6YUSgg=
+github.com/SixofClubsss/Holdero v0.3.2-0.20240324082138-fb58ea79d340 h1:Ey3S1Ce3FcZALYPYlQWpXB3q50o+Rwyq6tLKJ46b1wM=
+github.com/SixofClubsss/Holdero v0.3.2-0.20240324082138-fb58ea79d340/go.mod h1:s/HTznd3Dj802cIk01NfT7ME2StFmW7WbCM6MFRUK+c=
 github.com/SixofClubsss/derohe v0.0.0-20240205090107-bc2f4bfa1103 h1:lYzakivk5KWnU9T5yMg5rJeyA/GIgCRgSswJXraN4vM=
 github.com/SixofClubsss/derohe v0.0.0-20240205090107-bc2f4bfa1103/go.mod h1:EWHh1VkXRnCHvyGML98kXhngDFYebmOhk/9kZ1ATJ1c=
 github.com/VictoriaMetrics/metrics v1.24.0 h1:ILavebReOjYctAGY5QU2F9X0MYvkcrG3aEn2RKa1Zkw=
@@ -94,8 +94,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creachadair/jrpc2 v0.43.0 h1:sgYSOoAWXZ5cx9pd2pYH8dkrjCNdDpFwhO4ucMeUz7U=
 github.com/creachadair/jrpc2 v0.43.0/go.mod h1:oOdNFoMQQpSirGcSujG10NYl05K/IYrIUUNbh+/Xcd8=
-github.com/dReam-dApps/dReams v0.11.2-0.20240320081104-78b46137b22d h1:znmzGAasXEF9O5JZO2bl3pyOMrFqI7APVvu3SuN+FS8=
-github.com/dReam-dApps/dReams v0.11.2-0.20240320081104-78b46137b22d/go.mod h1:HUL02+HlPTxlu47SucHCssOGLQRCqXW9iVtvZWY7NYE=
+github.com/dReam-dApps/dReams v0.11.2-0.20240324081711-c47d58bad443 h1:0Pa0NoWf0IV1wRx5szP6MNBq/zRurjPWxDOE3gRmlnM=
+github.com/dReam-dApps/dReams v0.11.2-0.20240324081711-c47d58bad443/go.mod h1:IE8fXy7iZcBTZ0H5jHTAAK60K6qGfPN0/a3iRRQV/3Q=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
