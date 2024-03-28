@@ -2,15 +2,12 @@ package baccarat
 
 import (
 	"fmt"
-	"image/color"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
 	"time"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -26,9 +23,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const app_tag = "Baccarat"
+const (
+	appName = "Baccarat"
+	appID   = "dreamdapps.io.baccarat"
+)
 
-var version = semver.MustParse("0.3.1-dev.1")
+var version = semver.MustParse("0.3.1-dev.2")
 var gnomon = gnomes.NewGnomes()
 
 // Check baccarat package version
@@ -40,32 +40,34 @@ func Version() semver.Version {
 func StartApp() {
 	n := runtime.NumCPU()
 	runtime.GOMAXPROCS(n)
+
+	// Initialize logrus logger to stdout
 	gnomes.InitLogrusLog(logrus.InfoLevel)
-	config := menu.ReadDreamsConfig(app_tag)
 
-	// Initialize Fyne app and window
-	a := app.NewWithID(fmt.Sprintf("%s Desktop Client", app_tag))
-	a.Settings().SetTheme(bundle.DeroTheme(config.Skin))
-	w := a.NewWindow(app_tag)
-	w.SetIcon(holdero.ResourceCardsIconPng)
-	w.Resize(fyne.NewSize(1400, 800))
-	w.SetMaster()
-	done := make(chan struct{})
+	// Read config.json file
+	config := menu.GetSettings(appName)
 
-	// Initialize dReams AppObject and close func
-	menu.Theme.Img = *canvas.NewImageFromResource(menu.DefaultThemeResource())
-	d := dreams.AppObject{
-		App:        a,
-		Window:     w,
-		Background: container.NewStack(&menu.Theme.Img),
-	}
+	// Initialize Fyne app and window as dreams.AppObject
+	d := dreams.NewFyneApp(
+		appID,
+		appName,
+		"On-chain Baccarat",
+		bundle.DeroTheme(config.Skin),
+		holdero.ResourceCardsIconPng,
+		menu.DefaultBackgroundResource(),
+		true)
+
+	// Set one channel for Baccarat routine
 	d.SetChannels(1)
+
+	// Initialize closing channels and func
+	done := make(chan struct{})
 
 	closeFunc := func() {
 		save := dreams.SaveData{
 			Skin:   config.Skin,
 			DBtype: gnomon.DBStorageType(),
-			Theme:  menu.Theme.Name,
+			Theme:  dreams.Theme.Name,
 		}
 
 		if rpc.Daemon.Rpc == "" {
@@ -74,14 +76,14 @@ func StartApp() {
 			save.Daemon = []string{rpc.Daemon.Rpc}
 		}
 
-		menu.WriteDreamsConfig(save)
+		menu.StoreSettings(save)
 		menu.SetClose(true)
-		gnomon.Stop(app_tag)
+		gnomon.Stop(appName)
 		d.StopProcess()
-		w.Close()
+		d.Window.Close()
 	}
 
-	w.SetCloseIntercept(closeFunc)
+	d.Window.SetCloseIntercept(closeFunc)
 
 	// Handle ctrl-c close
 	c := make(chan os.Signal, 1)
@@ -102,17 +104,11 @@ func StartApp() {
 			select {
 			case <-ticker.C:
 				rpc.Ping()
-				rpc.EchoWallet(app_tag)
-				go rpc.GetDreamsBalances(rpc.SCIDs)
-				rpc.GetWalletHeight(app_tag)
-
-				if rpc.Daemon.IsConnected() {
-					rpc.Startup = false
-				}
+				rpc.Wallet.Sync()
 
 				if rpc.Wallet.IsConnected() {
 					menu.Assets.Swap.Show()
-					menu.Assets.Balances.Refresh()
+					menu.Assets.Balances.List.Refresh()
 				} else {
 					menu.Assets.Swap.Hide()
 				}
@@ -120,7 +116,7 @@ func StartApp() {
 				d.SignalChannel()
 
 			case <-d.Closing():
-				logger.Printf("[%s] Closing...", app_tag)
+				logger.Printf("[%s] Closing...", appName)
 				ticker.Stop()
 				d.CloseAllDapps()
 				time.Sleep(time.Second)
@@ -130,15 +126,14 @@ func StartApp() {
 		}
 	}()
 
-	// Create dwidget connection box with controls
-	connect_box := dwidget.NewHorizontalEntries(app_tag, 1)
-	connect_box.Button.OnTapped = func() {
-		rpc.GetAddress(app_tag)
-		rpc.Ping()
-	}
+	// Create dwidget connection box, using default OnTapped for RPC/XSWD connections
+	connection := dwidget.NewHorizontalEntries(appName, 1, &d)
 
-	connect_box.AddDaemonOptions(config.Daemon)
-	connect_box.Container.Objects[0].(*fyne.Container).Add(menu.StartIndicators())
+	// Set any saved daemon configs
+	connection.AddDaemonOptions(config.Daemon)
+
+	// Adding dReams indicator panel for wallet, daemon and Gnomon
+	connection.AddIndicator(menu.StartIndicators(nil))
 
 	// Initialize profile widgets
 	line := canvas.NewLine(bundle.TextColor)
@@ -148,31 +143,29 @@ func StartApp() {
 	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
 	form = append(form, widget.NewFormItem("Avatar", holdero.AvatarSelect(menu.Assets.SCIDs)))
 	form = append(form, widget.NewFormItem("Theme", menu.ThemeSelect(&d)))
-	form = append(form, widget.NewFormItem("Card Deck", holdero.FaceSelect(menu.Assets.SCIDs)))
+	form = append(form, widget.NewFormItem("Card Deck", holdero.FaceSelect(menu.Assets.SCIDs, &d)))
 	form = append(form, widget.NewFormItem("Card Back", holdero.BackSelect(menu.Assets.SCIDs)))
 	form = append(form, widget.NewFormItem("", layout.NewSpacer()))
 	form = append(form, widget.NewFormItem("", container.NewVBox(line)))
 
-	profile_spacer := canvas.NewRectangle(color.Transparent)
-	profile_spacer.SetMinSize(fyne.NewSize(450, 0))
-
-	profile := container.NewCenter(container.NewBorder(profile_spacer, nil, nil, nil, widget.NewForm(form...)))
+	profile := container.NewCenter(container.NewBorder(dwidget.NewSpacer(450, 0), nil, nil, nil, widget.NewForm(form...)))
 
 	// Layout tabs
 	tabs := container.NewAppTabs(
-		container.NewTabItem(app_tag, LayoutAllItems(&d)),
-		container.NewTabItem("Assets", menu.PlaceAssets(app_tag, profile, nil, holdero.ResourceCardsCirclePng, &d)),
+		container.NewTabItem(appName, LayoutAll(&d)),
+		container.NewTabItem("Assets", menu.PlaceAssets(appName, profile, nil, holdero.ResourceCardsCirclePng, &d)),
 		container.NewTabItem("Swap", holdero.PlaceSwap(&d)),
-		container.NewTabItem("Log", rpc.SessionLog(app_tag, version)))
+		container.NewTabItem("Log", rpc.SessionLog(appName, version)))
 
 	tabs.SetTabLocation(container.TabLocationBottom)
 
+	// Start app and place layout
 	go func() {
 		time.Sleep(450 * time.Millisecond)
-		w.SetContent(container.NewStack(d.Background, container.NewStack(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connect_box.Container)))
+		d.Window.SetContent(container.NewStack(d.Background, container.NewStack(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connection.Container)))
 	}()
 
-	w.ShowAndRun()
+	d.Window.ShowAndRun()
 	<-done
-	logger.Printf("[%s] Closed", app_tag)
+	logger.Printf("[%s] Closed", appName)
 }
