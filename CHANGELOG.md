@@ -5,8 +5,10 @@ This file lists the changes to Baccarat repo with each version.
 ## 0.x.x - In Progress
 
 ### Added 
+* XSWD and DERO connections and calls
 * Hand log
 * FetchLastHand(), show last hand when connected
+* Update StartApp with upstream functions
 
 
 ### Changed
