@@ -28,7 +28,7 @@ const (
 	appID   = "dreamdapps.io.baccarat"
 )
 
-var version = semver.MustParse("0.3.1-dev.3")
+var version = semver.MustParse("0.3.1-dev.4")
 var gnomon = gnomes.NewGnomes()
 
 // Check baccarat package version
@@ -162,7 +162,7 @@ func StartApp() {
 	// Start app and place layout
 	go func() {
 		time.Sleep(450 * time.Millisecond)
-		d.Window.SetContent(container.NewStack(d.Background, container.NewStack(bundle.NewAlpha180(), tabs), container.NewVBox(layout.NewSpacer(), connection.Container)))
+		d.Window.SetContent(container.NewStack(d.Background, container.NewStack(bundle.NewAlpha180(0, 0), tabs), container.NewVBox(layout.NewSpacer(), connection.Container)))
 	}()
 
 	d.Window.ShowAndRun()
