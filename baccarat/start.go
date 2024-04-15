@@ -28,7 +28,7 @@ const (
 	appID   = "dreamdapps.io.baccarat"
 )
 
-var version = semver.MustParse("0.3.1-dev.6")
+var version = semver.MustParse("0.3.1-dev.7")
 var gnomon = gnomes.NewGnomes()
 
 // Check baccarat package version
