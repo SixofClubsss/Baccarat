@@ -44,7 +44,7 @@ var bacc baccValues
 // Get Baccarat SC data
 func fetchBaccSC() {
 	if rpc.Daemon.IsConnected() && rpc.Wallet.Height() > bacc.last {
-		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
+		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Endpoint)
 		defer cancel()
 
 		var result *dero.GetSC_Result
@@ -144,7 +144,7 @@ func fetchBaccSC() {
 // Get Baccarat hand by TXID
 func FetchHand(tx string) {
 	if rpc.Daemon.IsConnected() && tx != "" {
-		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
+		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Endpoint)
 		defer cancel()
 
 		var result *dero.GetSC_Result
@@ -200,7 +200,7 @@ func FetchHand(tx string) {
 // Get last hand played
 func FetchLastHand() (found bool) {
 	if rpc.Daemon.IsConnected() {
-		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Rpc)
+		client, ctx, cancel := rpc.SetDaemonClient(rpc.Daemon.Endpoint)
 		defer cancel()
 
 		var result *dero.GetSC_Result

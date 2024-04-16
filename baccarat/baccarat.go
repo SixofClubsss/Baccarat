@@ -310,7 +310,7 @@ func stopGif() {
 func GetBaccTables() {
 	if rpc.Daemon.IsConnected() {
 		Tables = make(map[string]string)
-		if table_map, ok := rpc.GetStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Rpc).(string); ok {
+		if table_map, ok := rpc.GetStringKey(rpc.RatingSCID, "bacc_tables", rpc.Daemon.Endpoint).(string); ok {
 			if str, err := hex.DecodeString(table_map); err == nil {
 				json.Unmarshal([]byte(str), &Tables)
 			}

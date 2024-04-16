@@ -28,7 +28,7 @@ const (
 	appID   = "dreamdapps.io.baccarat"
 )
 
-var version = semver.MustParse("0.3.1-dev.7")
+var version = semver.MustParse("0.3.1-dev.8")
 var gnomon = gnomes.NewGnomes()
 
 // Check baccarat package version
@@ -70,10 +70,10 @@ func StartApp() {
 			Theme:  dreams.Theme.Name,
 		}
 
-		if rpc.Daemon.Rpc == "" {
+		if rpc.Daemon.Endpoint == "" {
 			save.Daemon = config.Daemon
 		} else {
-			save.Daemon = []string{rpc.Daemon.Rpc}
+			save.Daemon = []string{rpc.Daemon.Endpoint}
 		}
 
 		menu.StoreSettings(save)
@@ -103,7 +103,7 @@ func StartApp() {
 		for {
 			select {
 			case <-ticker.C:
-				rpc.Ping()
+				rpc.Daemon.Ping()
 				rpc.Wallet.Sync()
 
 				if rpc.Wallet.IsConnected() {
