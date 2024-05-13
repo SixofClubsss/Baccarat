@@ -28,7 +28,7 @@ const (
 	appID   = "dreamdapps.io.baccarat"
 )
 
-var version = semver.MustParse("0.3.1-dev.8")
+var version = semver.MustParse("0.3.1-dev.9")
 var gnomon = gnomes.NewGnomes()
 
 // Check baccarat package version
@@ -54,8 +54,7 @@ func StartApp() {
 		"On-chain Baccarat",
 		bundle.DeroTheme(config.Skin),
 		holdero.ResourceCardsIconPng,
-		menu.DefaultBackgroundResource(),
-		true)
+		menu.DefaultBackgroundResource())
 
 	// Set one channel for Baccarat routine
 	d.SetChannels(1)

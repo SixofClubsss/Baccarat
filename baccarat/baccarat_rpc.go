@@ -161,10 +161,9 @@ func FetchHand(tx string) {
 
 		Total_jv := result.VariableStringKeys["TotalHandsPlayed:"]
 		if Total_jv != nil {
-			Display_jv := result.VariableStringKeys["display"]
-			start := rpc.IntType(Total_jv) - rpc.IntType(Display_jv)
+			start := rpc.IntType(Total_jv) - rpc.IntType(result.VariableStringKeys["display"])
 
-			for i := start; i < start+45; i++ {
+			for i := start; i < start+65; i++ {
 				h := "-Hand#TXID:"
 				w := strconv.Itoa(i)
 
