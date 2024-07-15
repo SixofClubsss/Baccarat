@@ -15,7 +15,7 @@ This file lists the changes to Baccarat repo with each version.
 * Rename FetchBaccHand() to FetchHand
 * Handle Action Show/Hide in OnTapped 
 * Clean up unused vars
-* Fyne 2.4.5
+* Fyne 2.5.0
 * dReams 0.12.0
 
 
