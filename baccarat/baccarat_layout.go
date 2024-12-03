@@ -3,6 +3,7 @@ package baccarat
 import (
 	"image/color"
 
+	"github.com/civilware/tela/logger"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/dwidget"
 
@@ -36,7 +37,7 @@ func LayoutAll(d *dreams.AppObject) *fyne.Container {
 	var err error
 	waiting, err = xwidget.NewAnimatedGifFromResource(ResourceLoadingGif)
 	if err != nil {
-		logger.Errorln("[Baccarat] Err loading gif")
+		logger.Errorf("[Baccarat] Err loading gif\n")
 	} else {
 		waiting.SetMinSize(fyne.NewSize(100, 100))
 		waiting.Hide()

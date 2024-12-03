@@ -10,12 +10,11 @@ import (
 	"time"
 
 	"github.com/SixofClubsss/Holdero/holdero"
-	"github.com/civilware/Gnomon/structures"
+	"github.com/civilware/tela/logger"
 	dreams "github.com/dReam-dApps/dReams"
 	"github.com/dReam-dApps/dReams/dwidget"
 	"github.com/dReam-dApps/dReams/menu"
 	"github.com/dReam-dApps/dReams/rpc"
-	"github.com/sirupsen/logrus"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -28,7 +27,6 @@ import (
 
 var Tables map[string]string
 var waiting *xwidget.AnimatedGif
-var logger = structures.Logger.WithFields(logrus.Fields{})
 
 func DreamsMenuIntro() (entries map[string][]string) {
 	entries = map[string][]string{
@@ -75,7 +73,7 @@ func fetch(d *dreams.AppObject) {
 			BaccRefresh(d)
 			d.WorkDone()
 		case <-d.CloseDapp():
-			logger.Println("[Baccarat] Done")
+			logger.Printf("[Baccarat] Done\n")
 			return
 		}
 	}

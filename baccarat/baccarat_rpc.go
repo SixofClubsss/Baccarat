@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/civilware/tela/logger"
 	"github.com/dReam-dApps/dReams/rpc"
 	"github.com/deroproject/derohe/cryptography/crypto"
 	dero "github.com/deroproject/derohe/rpc"
@@ -55,7 +56,7 @@ func fetchBaccSC() {
 		}
 
 		if err := client.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
-			logger.Errorln("[FetchBaccSC]", err)
+			logger.Errorf("[FetchBaccSC] %s\n", err)
 			return
 		}
 
@@ -155,7 +156,7 @@ func FetchHand(tx string) {
 		}
 
 		if err := client.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
-			logger.Errorln("[FetchHand]", err)
+			logger.Errorf("[FetchHand] %s\n", err)
 			return
 		}
 
@@ -210,7 +211,7 @@ func FetchLastHand() (found bool) {
 		}
 
 		if err := client.CallFor(ctx, &result, "DERO.GetSC", params); err != nil {
-			logger.Errorln("[FetchLastHand]", err)
+			logger.Errorf("[FetchLastHand] %s\n", err)
 			return
 		}
 
